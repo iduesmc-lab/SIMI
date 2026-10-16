@@ -1,29 +1,28 @@
 # Guía de arte con IA — Doctor Simi al estilo Hollow Knight
 
-Objetivo: sustituir los sprites provisionales (pixel art "chibi" de 128 px) por un Doctor Simi que parezca parte de Hollow Knight. El código ya está listo para recibirlos: `Tools/import_sheet.py` recorta, limpia y alinea las hojas que generes, y el mod las usa en cuanto aparecen en el manifiesto.
+Objetivo: **el mismo Doctor Simi de los sprites actuales** (mismo personaje, mismas proporciones y poses), redibujado con el **acabado visual** de Hollow Knight. No se convierte en insecto ni se rediseña; solo cambia la técnica de dibujo, el color y la luz. El código ya está listo para recibirlos: `Tools/import_sheet.py` recorta, limpia y alinea las hojas que generes, y el mod las usa en cuanto aparecen en el manifiesto.
 
-## 1. Qué hace que algo "parezca Hollow Knight"
+## 1. Qué cambia y qué se mantiene
 
-| Rasgo | Hollow Knight | Sprites actuales (a evitar) |
-|---|---|---|
-| Técnica | Dibujo a mano, pintado suave, alta resolución | Pixel art de 128 px |
-| Contorno | Tinta negra limpia, grosor variable | Contorno de píxel de 1 px |
-| Color | Apagado y oscuro; uno o dos acentos de color | Rojo y amarillo saturados |
-| Proporciones | Siluetas simples y rotundas, cabeza/máscara grande, cuerpo compacto | Personaje "mascota" redondo |
-| Cara | Máscara o caparazón claro con ojos negros grandes y vacíos | Cara de peluche con mejillas |
-| Ambiente | Gótico, subterráneo, melancólico | Alegre y de cartel |
+| Se mantiene (diseño) | Cambia (acabado al estilo Hollow Knight) |
+|---|---|
+| Abuelo con gorra roja con visera | Dibujo a mano en alta resolución en vez de pixel art de 128 px |
+| Pelo blanco a los lados y bigote blanco grande | Contorno de tinta negra limpia de grosor variable, no de 1 px |
+| Cara beige, ojos grandes | Sombreado pintado suave, con luz fría y ambiental de cueva |
+| Uniforme rojo con bandas amarillas, cinturón y botas negras | Colores apagados: rojo vino en vez de rojo puro, amarillo ocre mate en vez de amarillo brillante |
+| Proporciones y siluetas de cada pose | Sombras más profundas y un poco de textura, menos brillo "de plástico" |
+| Las poses y el orden de los cuadros de cada animación | Formas algo más limpias y simplificadas, como los personajes del juego |
 
-## 2. Diseño propuesto
+## 2. Método: redibujar las hojas que ya tienes
 
-Mantener lo reconocible del Doctor Simi y pasarlo por el mundo de Hallownest:
+Cada animación existente es ya una hoja de **3 × 2 poses** en `Sprites/<Animación>/<animación>_spritesheet_128.png` (por ejemplo `Sprites/Attack/attack_spritesheet_128.png`). Para cada una:
 
-- **Silueta**: escarabajo anciano, robusto y algo encorvado, un poco más alto que ancho.
-- **Cara**: máscara/caparazón blanco hueso con dos ojos negros grandes y vacíos. El **bigote blanco** grande y los **mechones de pelo blanco** a los lados siguen siendo la seña principal.
-- **Gorra**: roja apagada (rojo vino), con visera; es el acento de color principal.
-- **Ropa**: abrigo/caparazón rojo oscuro con **bandas amarillas mates** (reflectantes gastadas), cinturón y botas negras.
-- **Detalles**: costuras, desgaste, algún vendaje o frasco colgando para darle tono "médico de Hallownest".
+1. Sube esa hoja a tu herramienta de IA como **imagen de referencia** (función *image to image*, *reference* o *edit*). Mejor usa la versión ampliada sobre verde (`<Animación>_reference.png`, 1536 × 1024), que genera `Tools/make_reference_sheets.py`: la original de 384 × 256 con fondo transparente es demasiado pequeña para muchas herramientas.
+2. Usa el prompt de la sección 5 para que la **redibuje** con el estilo de Hollow Knight, manteniendo personaje, poses y orden.
+3. Si la herramienta lo permite, ajusta la fuerza de la referencia alta (≈ 0,6–0,8) para que no invente otro personaje ni cambie las poses.
+4. Haz primero `Idle`; cuando te guste el resultado, úsalo además como **referencia de estilo** en todas las demás, para que todas tengan el mismo acabado.
 
-Primero genera una **hoja de referencia** (frente, perfil izquierdo, 3/4) y elige una versión. Úsala después como imagen de referencia en todas las animaciones para que el personaje sea siempre el mismo.
+Los ataques especiales no tienen hoja todavía. Para ellos usa como referencia de poses las láminas de `References/` (por ejemplo `special_attacks_concept_sheet.png` o `saludo_cargado_concept_sheet.png`) junto con tu `Idle` ya redibujado como referencia de personaje y estilo.
 
 ## 3. Reglas técnicas para cada hoja (importante)
 
@@ -72,32 +71,40 @@ Seis poses por animación para que la IA mantenga la coherencia. Orden de las po
 | `CapsuleBurst` | 3 × 2 | Cápsula reventando en polvo y chispas al tocar el suelo |
 | `PunchImpact` | 3 × 2 | Destello de impacto blanco/dorado al estilo Hollow Knight |
 
-## 5. Plantilla de prompt
+## 5. Plantillas de prompt
 
-Los generadores suelen funcionar mejor en inglés. Sustituye `[GRID]` y `[POSES]`:
+Los generadores suelen funcionar mejor en inglés.
+
+**Animaciones existentes** (con la hoja actual adjunta como referencia):
 
 ```
-2D side-view game sprite sheet, hand-painted in the style of Hollow Knight by Team Cherry:
-dark muted palette, clean black ink outlines of varying thickness, soft painterly shading,
-simple bold silhouette, gothic underground mood.
-Character: an old sturdy beetle doctor from Hallownest with a bone-white shell mask face,
-large hollow black eyes, a big bushy white mustache and white hair tufts on the sides,
-a faded wine-red cap with a visor, a dark red coat with dull worn yellow reflective bands,
-black belt and black boots.
-Full body, facing left, [GRID] grid of evenly spaced poses, same size and scale in every cell,
-feet on the same baseline: [POSES].
+Redraw the attached sprite sheet in the visual style of Hollow Knight by Team Cherry.
+Keep the SAME character, design, proportions, poses, pose order and 3x2 layout:
+an old man mascot with a red cap with a visor, white hair on the sides, a big white mustache,
+a beige face with large eyes, a red work uniform with yellow reflective bands,
+a black belt and black boots. Do not turn him into a bug or change his design.
+Change only the rendering: hand-drawn high-resolution 2D game art, clean black ink outlines
+of varying thickness, soft painterly shading, muted colors (wine red instead of pure red,
+dull ochre instead of bright yellow), cool dim cave lighting, subtle texture, gothic mood.
+Full body, facing left, same size and scale in every cell, feet on the same baseline.
 Flat pure green background #00FF00, no floor, no shadows, no text, no borders.
 ```
 
-Ejemplo para `Attack`: `[GRID]` = `3x2`, `[POSES]` = `1 guard stance, 2 fist pulled back, 3 punch starting, 4 arm fully extended punch, 5 recovering, 6 back to guard`.
+**Ataques especiales nuevos** (con tu `Idle` redibujado y la lámina de poses adjuntos):
 
-Para la hoja de referencia: cambia la última parte por `character turnaround sheet: front view, left side view, three-quarter view`.
+```
+Using the attached character (same design and Hollow Knight style), draw a 3x2 sprite sheet
+of these poses: [POSES].
+Same character, proportions and rendering as the reference, full body, facing left,
+same size and scale in every cell, feet on the same baseline.
+Flat pure green background #00FF00, no floor, no shadows, no text, no borders.
+```
 
 Consejos:
 
-- Adjunta la hoja de referencia elegida como imagen de referencia en cada generación.
-- Si una pose sale distinta (otro color o proporciones), regenera solo esa hoja; no mezcles personajes.
-- Si la IA dibuja sombras o suelo, añade `no ground, no cast shadow, isolated on green`.
+- Si la IA cambia el diseño (otro color de gorra, sin bigote, aspecto de insecto), baja la creatividad o sube la fuerza de la referencia y repite.
+- Si una sola pose sale mal, regenera la hoja entera; no mezcles poses de generaciones distintas.
+- Si dibuja sombras o suelo, añade `no ground, no cast shadow, isolated on green`.
 
 ## 6. Cómo me lo entregas
 
@@ -120,7 +127,8 @@ Después actualizo el manifiesto: rutas, tamaño de cuadro 256, 64 px por unidad
 
 ## 7. Revisión antes de enviarla
 
-- [ ] El personaje es el mismo en todas las poses (colores, bigote, gorra).
+- [ ] Es el mismo Doctor Simi de los sprites actuales (gorra, pelo y bigote blancos, uniforme con bandas), no un personaje nuevo.
+- [ ] Las poses y su orden coinciden con la hoja original.
 - [ ] Mira a la izquierda en todas las poses.
 - [ ] Fondo verde plano, sin suelo ni sombras.
 - [ ] Las poses no se tocan entre sí ni se salen de su celda.
