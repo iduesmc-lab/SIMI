@@ -51,7 +51,11 @@ namespace DoctorSimiBoss.Core.Manifest
             }
 
             var scale = GetObject(root, "spriteScale");
-            if (scale != null) manifest.SpritePixelsPerUnit = (float)GetNumber(scale, "pixelsPerUnit", 0);
+            if (scale != null)
+            {
+                manifest.SpritePixelsPerUnit = (float)GetNumber(scale, "pixelsPerUnit", 0);
+                manifest.BossScale = (float)GetNumber(scale, "bossScale", 1);
+            }
 
             var hitboxes = GetObject(root, "hitboxes");
             if (hitboxes != null)

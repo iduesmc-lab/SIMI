@@ -142,6 +142,7 @@ namespace DoctorSimiBoss.Core.Manifest
         private static void CheckBoxes(AnimationManifest manifest, ManifestReport report)
         {
             if (manifest.SpritePixelsPerUnit < 0) report.Errors.Add("spriteScale.pixelsPerUnit must be positive");
+            if (manifest.BossScale <= 0) report.Errors.Add("spriteScale.bossScale must be positive");
             CheckBox(manifest, manifest.BodyBox, "hitboxes.body", report);
             CheckBox(manifest, manifest.PunchBox, "hitboxes.punch", report);
         }

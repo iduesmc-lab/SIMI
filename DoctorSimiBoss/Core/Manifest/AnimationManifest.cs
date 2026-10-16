@@ -16,6 +16,8 @@ namespace DoctorSimiBoss.Core.Manifest
         public string SpriteFacing = "left";
         /// <summary>Frame pixels per game world unit for the boss sprites; 0 when not declared.</summary>
         public float SpritePixelsPerUnit;
+        /// <summary>Extra in-game size multiplier for the boss (sprite and its hit areas); 1 = as drawn.</summary>
+        public float BossScale = 1f;
         /// <summary>Hurtbox in frame pixels, or null.</summary>
         public PixelRect BodyBox;
         /// <summary>Damaging area of the punch in frame pixels, or null.</summary>

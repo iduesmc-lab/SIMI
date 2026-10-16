@@ -95,6 +95,9 @@ namespace DoctorSimiBoss.Scene
 
             var manifest = definition.Manifest;
             transform.position = new Vector3(_origin.x + arena.BossLandingX, Floor, 0.01f);
+            // Scaling the root grows the sprite and every collider under it together.
+            float bossScale = manifest.BossScale > 0 ? manifest.BossScale : 1f;
+            transform.localScale = new Vector3(bossScale, bossScale, 1f);
 
             _renderer = gameObject.AddComponent<SpriteRenderer>();
             _player = gameObject.AddComponent<FramePlayer>();
@@ -107,7 +110,7 @@ namespace DoctorSimiBoss.Scene
             hurt.isTrigger = true;
             hurt.offset = new Vector2(bodyBox.CenterX, bodyBox.CenterY);
             hurt.size = new Vector2(bodyBox.Width, bodyBox.Height);
-            _halfWidth = bodyBox.Width / 2f;
+            _halfWidth = bodyBox.Width / 2f * bossScale;
 
             // HeroBox only checks that a DamageHero component exists, so damage areas are switched
             // off by deactivating their GameObject (entrance, phase change, defeat).
@@ -299,13 +302,14 @@ namespace DoctorSimiBoss.Scene
         }
 
         /// <summary>One-shot effect (impact, burst) from the manifest's effects.</summary>
-        private void SpawnEffect(string effectName, Vector3 position, bool flipX)
+        private void SpawnEffect(string effectName, Vector3 position, bool flipX, float scale = 1f)
         {
             var frames = _sprites.Get(effectName);
             if (frames == null || !_definition.Manifest.Effects.TryGetValue(effectName, out var clip)) return;
             var go = new GameObject(effectName);
             go.transform.SetParent(transform.parent, true);
             go.transform.position = position;
+            go.transform.localScale = new Vector3(scale, scale, 1f);
             var renderer = go.AddComponent<SpriteRenderer>();
             renderer.flipX = flipX;
             renderer.sortingOrder = 6;
@@ -417,7 +421,8 @@ namespace DoctorSimiBoss.Scene
         public void PlayEffect(string effectName)
         {
             var box = FrameGeometry.ToLocal(_definition.Manifest, _definition.Manifest.PunchBox, _facing);
-            SpawnEffect(effectName, transform.position + new Vector3(box.CenterX, box.CenterY, -0.02f), _renderer.flipX);
+            float s = transform.localScale.x;
+            SpawnEffect(effectName, transform.position + new Vector3(box.CenterX * s, box.CenterY * s, -0.02f), _renderer.flipX, s);
         }
 
         public void OnDefeated()

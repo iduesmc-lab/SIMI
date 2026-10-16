@@ -13,6 +13,7 @@ namespace DoctorSimiBoss.Core.Tests
         {
             var m = _def.Manifest;
             Assert.Equal(64f, m.SpritePixelsPerUnit);
+            Assert.Equal(1.5f, m.BossScale, 3);
             Assert.Equal(0.97f, m.OriginY, 3);
             Assert.Equal(120f, m.BodyBox.Width);
             Assert.Equal(40f, m.PunchBox.X);

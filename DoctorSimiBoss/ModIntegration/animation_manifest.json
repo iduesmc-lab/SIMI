@@ -14,7 +14,8 @@
   "spriteFacing": "left",
   "spriteScale": {
     "pixelsPerUnit": 64,
-    "note": "Character is ~224 px tall in every frame (one shared import scale), about 3.5 world units."
+    "bossScale": 1.5,
+    "note": "Character is ~224 px tall in every frame = 3.5 units at 64 px/unit; bossScale 1.5 makes him ~5.3 units tall in game (sprite and hit areas). Change bossScale to resize without recompiling."
   },
   "hitboxes": {
     "note": "Rectangles in frame pixels (origin top-left, sprite facing left), measured on SpritesHD Idle and Attack frame 03.",
@@ -423,7 +424,7 @@
     "note": "Godhome-level prototype: 2 masks per hit, short pauses, punch combos, faster later phases. Values in world units; tune by playing.",
     "maxHealth": 1300,
     "moveSpeed": 6,
-    "attackRange": 3.2,
+    "attackRange": 4.6,
     "idleBetweenActions": 0.35,
     "moveDuration": 0.8,
     "hurtDuration": 0,
