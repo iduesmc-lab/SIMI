@@ -6,7 +6,7 @@
 |---|---|
 | Lógica del jefe (`../Core`) | Implementada y con pruebas unitarias (60) en .NET 8. Compila para `net472` y `netstandard2.0` sin dependencias del juego. |
 | Lectura y validación del manifiesto | Implementada. Comprueba que existan los 48 cuadros, que sean PNG de 128 × 128, que las fases sean coherentes y que no se use arte conceptual como sprite. |
-| Entrada del mod (`DoctorSimiBossMod.cs`) | Carga y valida el manifiesto y lo escribe en el log. **Compila sin errores ni avisos** contra el `Assembly-CSharp.dll` de ModdingAPI v77 publicado (`moddingapi.v77.windows.zip`, misma fecha y tamaño que el instalado por Scarab). Las 250 referencias a `mscorlib` existen en el `mscorlib.dll` del juego. **Aún no se ha ejecutado dentro del juego.** |
+| Entrada del mod (`DoctorSimiBossMod.cs`) | Carga y valida el manifiesto y lo escribe en el log. **Compila sin errores ni avisos** contra el `Assembly-CSharp.dll` de ModdingAPI v77 publicado (`moddingapi.v77.windows.zip`, misma fecha y tamaño que el instalado por Scarab). Las 250 referencias a `mscorlib` existen en el `mscorlib.dll` del juego. **Probado en el juego** (Hollow Knight 1.5.78.11833, API v77, instalado con Lumafly): carga sin errores, los 48 cuadros dan OK y la arena mide 41.78 × 23.53 unidades según `ModLog.txt`. |
 | Arena | Tu imagen está en `../Arena/` con suelo, paredes y puntos de entrada medidos (provisionales). Se valida y se empaqueta. |
 | Inserción en una escena | **No implementada.** Faltan la versión del juego y la ruta de `Managed` (ver abajo). |
 | Jugable en Hollow Knight | **No.** Todavía no hay objeto del jefe en el juego, ni sprites cargados en Unity, ni colisiones. |
@@ -100,7 +100,7 @@ Si faltan las DLL, la compilación se detiene con un mensaje que indica la ruta 
 
 ## Versión del juego
 
-Tu juego está en **1.5.12620**. Las versiones de la Modding API publicadas en [hk-modding/api](https://github.com/hk-modding/api/releases) (hasta la v77) son para **1.5.78.11833**. Los avisos de Scarab y Lumafly sobre el parche 1.5.12459 indican que la API no funciona en los parches 1.5.12xxx, y no he encontrado ninguna versión para 1.5.12620. La API instalada (v77) solo funciona con el juego en 1.5.78.11833.
+Tu juego estaba en **1.5.12620**; ya está en **1.5.78.11833** con la API v77 funcionando. Las versiones de la Modding API publicadas en [hk-modding/api](https://github.com/hk-modding/api/releases) (hasta la v77) son para **1.5.78.11833**. Los avisos de Scarab y Lumafly sobre el parche 1.5.12459 indican que la API no funciona en los parches 1.5.12xxx, y no he encontrado ninguna versión para 1.5.12620. La API instalada (v77) solo funciona con el juego en 1.5.78.11833.
 
 Pasos:
 
