@@ -69,6 +69,8 @@ namespace DoctorSimiBoss.Scene
             public Action Run;
         }
 
+        private AudioSource _telegraphAudio;
+
         public BossStateMachine Machine => _driver?.Machine;
         public event Action Defeated;
 
@@ -127,6 +129,7 @@ namespace DoctorSimiBoss.Scene
             // No melee hitbox: the boss attacks with projectiles, waves, the dash and its body.
             // hitboxes.punch is only used as the hand position projectiles are thrown from.
             _whiteFlash = WhiteFlash.Create(_renderer);
+            if (manifest.Presentation.TelegraphSound) _telegraphAudio = TelegraphSound.Attach(gameObject);
             _hitEffects = HitEffectsDonor.AttachTo(gameObject, new Vector3(0f, bodyBox.CenterY * bossScale, 0f));
             _log(_hitEffects != null ? "Boss uses Hollow Knight's enemy hit effects."
                                      : "No enemy hit effects found yet (visit a room with normal enemies first); using the white flash only.");
@@ -231,6 +234,7 @@ namespace DoctorSimiBoss.Scene
             _stageAttack = attack;
             _stageStart = _clock;
             if (stage == AttackStage.None) { _schedule.Clear(); EndArc(); return; }
+            if (stage == AttackStage.Windup && attack.IsSpecial) TelegraphSound.Play(_telegraphAudio);
             if (stage == AttackStage.Active && attack.Id != AttackCatalog.LeapAttackId &&
                 attack.Id != "PisotonSimi" && attack.Id != "GiroBotarga")
                 _motion.Strike(attack.IsSpecial ? 1.2f : 0.8f);

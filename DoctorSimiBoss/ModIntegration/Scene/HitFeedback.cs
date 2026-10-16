@@ -20,6 +20,10 @@ namespace DoctorSimiBoss.Scene
 
         public static bool Ready => _holder != null;
 
+        /// <summary>Mixer group of the donor's audio player (the game's sound-effects channel), or null.</summary>
+        public static UnityEngine.Audio.AudioMixerGroup MixerGroup =>
+            _holder != null && _holder.audioPlayerPrefab != null ? _holder.audioPlayerPrefab.outputAudioMixerGroup : null;
+
         /// <summary>Looks for a usable enemy among loaded objects; cheap once a donor is stored.</summary>
         public static void TryCapture(Action<string> log)
         {

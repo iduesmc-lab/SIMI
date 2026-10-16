@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using DoctorSimiBoss.Core;
@@ -28,7 +29,40 @@ namespace DoctorSimiBoss
 
         public DoctorSimiBossMod() : base("Doctor Simi Boss") { }
 
-        public override string GetVersion() => "0.8.0-prototype";
+        public override string GetVersion() => "0.9.0-prototype";
+
+        /// <summary>
+        /// Objects whose music cue the boss can borrow, from presentation.musicPreloads. The manifest is read
+        /// here because the API asks for preloads before Initialize. A scene or object that does not exist is
+        /// only a warning from the API ("attempted preload from non-existent scene", "Could not find object").
+        /// </summary>
+        public override List<(string, string)> GetPreloadNames()
+        {
+            var list = new List<(string, string)>();
+            try
+            {
+                var manifest = AnimationManifestParser.Parse(File.ReadAllText(ManifestPath()));
+                if (manifest.Presentation.Music)
+                    foreach (var p in manifest.Presentation.MusicPreloads) list.Add((p.Key, p.Value));
+            }
+            catch (Exception e)
+            {
+                Log("No music preloads: " + e.Message);
+            }
+            return list;
+        }
+
+        public override void Initialize(Dictionary<string, Dictionary<string, GameObject>> preloadedObjects)
+        {
+            BossMusic.Collect(preloadedObjects, Log);
+            Initialize();
+        }
+
+        private static string ManifestPath()
+        {
+            string modDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            return Path.Combine(modDirectory, ManifestRelativePath.Replace('/', Path.DirectorySeparatorChar));
+        }
 
         public override void Initialize()
         {
@@ -56,7 +90,7 @@ namespace DoctorSimiBoss
 
             Definition = definition;
             Log("Boss definition ready: " + definition.Manifest.Phases.Count + " phases, max health " +
-                definition.Tuning.MaxHealth + ". Scene insertion is not implemented yet.");
+                definition.Tuning.MaxHealth + ".");
 
             var arena = definition.CreateArenaLayout();
             if (arena == null)

@@ -54,6 +54,7 @@ namespace DoctorSimiBoss.Scene
             // The arena belonged to the old scene and was destroyed with it; the camera re-initialises its limits.
             _arenaRoot = null;
             _boss = null;
+            BossMusic.Forget();
             _log("Scene changed; arena closed.");
         }
 
@@ -95,6 +96,11 @@ namespace DoctorSimiBoss.Scene
 
             _arenaRoot = ArenaBuilder.Build(_arena, origin, _sprites.Background, layers);
             _boss = DoctorSimiBody.Create(_definition, _sprites, _arena, origin, _arenaRoot.transform, layers, _log);
+            _boss.Defeated += () => BossMusic.Restore(_log, 3f);
+            var presentation = _definition.Manifest.Presentation;
+            if (_definition.Manifest.Arena.Rain) RainFx.Create(_arenaRoot.transform, _arena.Width, _arena.Height);
+            BossMusic.Play(presentation, _log);
+            BossTitle.Show(_arenaRoot.transform, presentation.Title, _definition.Tuning.IntroDuration + 0.3f, _log);
 
             _returnPosition = hero.transform.position;
             MoveHero(hero, new Vector3(origin.x + _arena.PlayerEntryX, origin.y + _arena.FloorY + 1.5f, _returnPosition.z));
@@ -111,6 +117,7 @@ namespace DoctorSimiBoss.Scene
 
             Destroy(_arenaRoot);
             _arenaRoot = null;
+            BossMusic.Restore(_log);
             _boss = null;
             cameraCtrl.xLimit = _savedXLimit;
             cameraCtrl.yLimit = _savedYLimit;

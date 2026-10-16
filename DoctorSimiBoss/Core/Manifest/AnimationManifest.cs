@@ -52,6 +52,21 @@ namespace DoctorSimiBoss.Core.Manifest
 
         /// <summary>Procedural motion settings ("motion" block).</summary>
         public MotionSettings Motion = new MotionSettings();
+
+        /// <summary>Boss title, music and sounds ("presentation" block).</summary>
+        public PresentationSettings Presentation = new PresentationSettings();
+    }
+
+    public sealed class PresentationSettings
+    {
+        /// <summary>Name shown on screen when the fight starts; empty disables the title.</summary>
+        public string Title = "DOCTOR SIMI";
+        public bool Music = true;
+        /// <summary>Exact name of the MusicCue to use; null picks the first available candidate.</summary>
+        public string MusicCue;
+        /// <summary>(scene, object path) pairs preloaded at startup to keep their scene music cues in memory.</summary>
+        public readonly List<KeyValuePair<string, string>> MusicPreloads = new List<KeyValuePair<string, string>>();
+        public bool TelegraphSound = true;
     }
 
     public sealed class MotionSettings
@@ -83,6 +98,8 @@ namespace DoctorSimiBoss.Core.Manifest
         public float BossLandingX;
         /// <summary>Pixel column where the player is placed when entering the arena.</summary>
         public float PlayerEntryX;
+        /// <summary>Draw animated rain over the arena.</summary>
+        public bool Rain;
     }
 
     public sealed class EncounterInfo

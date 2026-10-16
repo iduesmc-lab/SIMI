@@ -610,21 +610,22 @@
     }
   ],
   "arena": {
-    "note": "Single background image under a simple fight room. Pixel measurements taken by eye from the image; calibrate in-game.",
-    "background": "Assets/Arena/arena_background.png",
-    "sourceOriginal": "Arena/arena_background_original.webp",
+    "note": "Rooftop at night (AI image from the user, Arena/rooftop_original.png). Pixel measurements taken from the image; calibrate in game. The first arena (arena_background.png) stays in the repository but is not shipped.",
+    "background": "Assets/Arena/arena_rooftop.png",
+    "sourceOriginal": "Arena/rooftop_original.png",
     "imageSize": {
-      "width": 1671,
+      "width": 1672,
       "height": 941
     },
     "pixelsPerUnit": 40,
-    "floorY": 715,
+    "floorY": 718,
     "walls": {
-      "left": 200,
-      "right": 1475
+      "left": 230,
+      "right": 1465
     },
     "bossLandingX": 1150,
-    "playerEntryX": 420
+    "playerEntryX": 430,
+    "rain": true
   },
   "encounter": {
     "note": "First in-game test: press debugKey in a gameplay room to enter the arena; press it again to leave. The boss jumps in (Spawn) and lands.",
@@ -650,5 +651,18 @@
     "intensity": 1.0,
     "acceleration": 45,
     "afterimages": true
+  },
+  "presentation": {
+    "note": "Title shown when the fight starts, boss music and telegraph sounds. Music: the objects in musicPreloads are preloaded at startup and their MusicCue (private field musicCue of Hollow Knight's SceneManager component) is used for the fight. Room_Colosseum_Bronze is a scene name present in Assembly-CSharp.dll; the object name _SceneManager is NOT verified (the API only warns if it is missing). ModLog lists every cue found. Put part of a cue name in musicCue to choose one.",
+    "title": "DOCTOR SIMI",
+    "music": true,
+    "musicCue": null,
+    "musicPreloads": [
+      [
+        "Room_Colosseum_Bronze",
+        "_SceneManager"
+      ]
+    ],
+    "telegraphSound": true
   }
 }

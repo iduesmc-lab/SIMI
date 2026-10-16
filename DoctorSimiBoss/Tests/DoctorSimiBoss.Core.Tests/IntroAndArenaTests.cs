@@ -60,8 +60,9 @@ namespace DoctorSimiBoss.Core.Tests
         public void ManifestDescribesTheArenaAndEncounter()
         {
             var a = _def.Manifest.Arena;
-            Assert.Equal("Assets/Arena/arena_background.png", a.Background);
-            Assert.Equal(1671, a.ImageWidth);
+            Assert.Equal("Assets/Arena/arena_rooftop.png", a.Background);
+            Assert.True(a.Rain);
+            Assert.Equal(1672, a.ImageWidth);
             Assert.Equal(941, a.ImageHeight);
             Assert.Equal("debugKey", _def.Manifest.Encounter.Access);
             Assert.Equal("Spawn", _def.Manifest.Encounter.EntranceAnimation);
@@ -72,10 +73,10 @@ namespace DoctorSimiBoss.Core.Tests
         public void ConvertsImagePixelsToWorldUnits()
         {
             var layout = _def.CreateArenaLayout();
-            Assert.Equal(1671f / 40f, layout.Width, 3);
-            Assert.Equal((941f - 715f) / 40f, layout.FloorY, 3);
-            Assert.Equal(5f, layout.LeftWallX, 3);
-            Assert.Equal(1475f / 40f, layout.RightWallX, 3);
+            Assert.Equal(1672f / 40f, layout.Width, 3);
+            Assert.Equal((941f - 718f) / 40f, layout.FloorY, 3);
+            Assert.Equal(230f / 40f, layout.LeftWallX, 3);
+            Assert.Equal(1465f / 40f, layout.RightWallX, 3);
             Assert.True(layout.PlayerEntryX < layout.BossLandingX);
             Assert.Equal(layout.LeftWallX + 0.5f, layout.ClampX(-100f, 0.5f), 3);
             Assert.Equal(layout.RightWallX - 0.5f, layout.ClampX(100f, 0.5f), 3);
@@ -88,7 +89,7 @@ namespace DoctorSimiBoss.Core.Tests
             var m = AnimationManifestParser.Parse(TestSupport.ManifestJson);
             m.Arena.ImageWidth = 1920;
             var report = ManifestValidator.Validate(m, ManifestPaths.ForSourcePackage(TestSupport.PackageRoot));
-            Assert.Contains(report.Errors, e => e.Contains("Arena background") && e.Contains("1671x941"));
+            Assert.Contains(report.Errors, e => e.Contains("Arena background") && e.Contains("1672x941"));
 
             m = AnimationManifestParser.Parse(TestSupport.ManifestJson);
             m.Arena.Background = "Assets/Arena/nope.png";
@@ -102,6 +103,7 @@ namespace DoctorSimiBoss.Core.Tests
         public void OriginalArenaImageIsKeptAlongsideThePng()
         {
             Assert.True(File.Exists(Path.Combine(TestSupport.PackageRoot, "Arena", "arena_background_original.webp")));
+            Assert.True(File.Exists(Path.Combine(TestSupport.PackageRoot, "Arena", "rooftop_original.png")));
         }
     }
 }

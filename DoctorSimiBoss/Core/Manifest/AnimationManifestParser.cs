@@ -159,6 +159,7 @@ namespace DoctorSimiBoss.Core.Manifest
                     RightWallX = walls != null ? (float)GetNumber(walls, "right", 0) : 0,
                     BossLandingX = (float)GetNumber(arena, "bossLandingX", 0),
                     PlayerEntryX = (float)GetNumber(arena, "playerEntryX", 0),
+                    Rain = GetBool(arena, "rain", false),
                 };
             }
 
@@ -189,6 +190,23 @@ namespace DoctorSimiBoss.Core.Manifest
                 manifest.Motion.Intensity = (float)GetNumber(motion, "intensity", 1);
                 manifest.Motion.Acceleration = (float)GetNumber(motion, "acceleration", 45);
                 manifest.Motion.Afterimages = GetBool(motion, "afterimages", true);
+            }
+
+            var presentation = GetObject(root, "presentation");
+            if (presentation != null)
+            {
+                var ps = manifest.Presentation;
+                if (presentation.ContainsKey("title")) ps.Title = GetString(presentation, "title") ?? "";
+                ps.Music = GetBool(presentation, "music", true);
+                ps.MusicCue = GetString(presentation, "musicCue");
+                ps.TelegraphSound = GetBool(presentation, "telegraphSound", true);
+                foreach (var item in GetArray(presentation, "musicPreloads"))
+                {
+                    var pair = item as List<object>;
+                    if (pair == null || pair.Count != 2 || !(pair[0] is string) || !(pair[1] is string))
+                        throw new FormatException("presentation.musicPreloads entries must be [scene, objectPath]");
+                    ps.MusicPreloads.Add(new KeyValuePair<string, string>((string)pair[0], (string)pair[1]));
+                }
             }
 
             var encounter = GetObject(root, "encounter");

@@ -67,3 +67,10 @@ El Caballero pelea a distancia corta y esquivando, así que los puñetazos direc
 
 - **Jeringas guiadas:** tres jeringas que salen hacia arriba, siguen al Caballero alrededor de un segundo y después vuelan en línea recta. Se esquivan cambiando de dirección en el último momento.
 - **Espiral de vendas:** tres brazos de vendas que giran desde el jefe durante dos segundos. Hay que colocarse entre los brazos y acompañar el giro.
+
+## Presentación (v0.9.0)
+
+- **Título:** solo "DOCTOR SIMI", abajo en pantalla, aparece al terminar la entrada y se desvanece (~4,5 s).
+- **Avisos:** cada especial empieza su carga con el brillo pulsante y un campanazo corto ascendente.
+- **Música:** una pista del propio juego (cue de `Room_Colosseum_Bronze`); vuelve la de la sala al salir o al ganar.
+- **Escenario:** azotea de noche con lluvia animada delante y detrás del jefe.
