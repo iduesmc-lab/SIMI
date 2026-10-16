@@ -8,7 +8,7 @@
 | Lectura y validación del manifiesto | Implementada. Comprueba que existan los 48 cuadros, que sean PNG de 128 × 128, que las fases sean coherentes y que no se use arte conceptual como sprite. |
 | Entrada del mod (`DoctorSimiBossMod.cs`) | Carga y valida el manifiesto y lo escribe en el log. **Compila sin errores ni avisos** contra el `Assembly-CSharp.dll` de ModdingAPI v77 publicado (`moddingapi.v77.windows.zip`, misma fecha y tamaño que el instalado por Scarab). Las 250 referencias a `mscorlib` existen en el `mscorlib.dll` del juego. **Probado en el juego** (Hollow Knight 1.5.78.11833, API v77, instalado con Lumafly): carga sin errores, los 48 cuadros dan OK y la arena mide 41.78 × 23.53 unidades según `ModLog.txt`. |
 | Arena | Tu imagen está en `../Arena/` con suelo, paredes y puntos de entrada medidos (provisionales). Se valida y se empaqueta. |
-| Encuentro en el juego (`Scene/`, v0.3.0) | **Compilado, sin probar en el juego.** Con **F8** en una sala jugable se construye la arena a la derecha de la sala (fuera de sus límites), el Caballero entra, la cámara se bloquea con el `CameraLockArea` del juego y el Doctor Simi entra con Spawn. Recibe golpes del aguijón y hechizos (`IHitResponder`), hace daño por contacto y con el puño (`DamageHero`) y usa la máquina de estados de `Core`. **F8** otra vez cierra la arena y te devuelve a donde estabas. Los especiales usan el golpe Attack con sus tiempos; ondas, cápsulas y pulsos aún no existen. |
+| Encuentro en el juego (`Scene/`) | **v0.3.0 probada en el juego** (funciona; demasiado fácil). **v0.4.0 compilada, sin probar**: nivel Godhome. Quita 2 máscaras, tiene 1300 de vida, pausas de 0,35 s, combos de hasta 3 puñetazos, salto hacia el jugador (Brinco) y velocidad ×1,15 y ×1,3 en las fases 2 y 3. Los seis especiales tienen coreografía propia: Saludo cargado (embestida con puño), Pisotón Simi (salto alto, caída y dos ondas), Carrera de pasillo (de pared a pared y aturdido al frenar), Giro de botarga (salto giratorio y ondas cortas), Lluvia de cápsulas (7 carriles, uno seguro, dos oleadas con aviso) y Aplauso de salida (tres pulsos y castigo largo). Las ondas, cápsulas y avisos se dibujan por código hasta que exista su arte. |
 | Jugable en Hollow Knight | **Pendiente de la primera prueba.** |
 
 ## Estructura
@@ -26,7 +26,8 @@ DoctorSimiBoss/
 │  ├─ Hosting/BossDriver.cs       Conecta la máquina de estados con IBossBody
 │  └─ BossDefinition.cs           Manifiesto + validación + ajustes + ataques en un solo objeto
 ├─ ModIntegration/                Proyecto del mod (compila también los fuentes de Core en una sola DLL)
-│  └─ Scene/                      Capa de Unity: sprites, cuerpo del jefe, arena y tecla de acceso
+│  └─ Scene/                      Capa de Unity: sprites, cuerpo y coreografía del jefe, peligros, arena y tecla de acceso
+├─ Tools/import_sheet.py         Convierte hojas generadas con IA en cuadros listos (ver ArtGuide.md)
 └─ Tests/DoctorSimiBoss.Core.Tests/  Pruebas xUnit de Core contra el manifiesto y los PNG reales
 ```
 
@@ -70,7 +71,7 @@ Todo es aditivo salvo una corrección:
 - Nuevos campos: `spriteFacing` (los sprites miran a la izquierda), `displayName`, `conceptSheet` y `prototypeTiming` en cada especial, `includesPreviousSpecials` en la fase 3, bloque `tuning` y lista `conceptReferences`.
 - Los tiempos y ajustes son puntos de partida para probar, no balance final. Las distancias están en unidades de mundo sin calibrar.
 
-## Probar el encuentro (v0.3.0)
+## Probar el encuentro
 
 1. Instala `DoctorSimiBoss.zip` con Lumafly (**Manually install**), sustituyendo la versión anterior.
 2. Carga una partida y, ya controlando al Caballero en cualquier sala, pulsa **F8**.

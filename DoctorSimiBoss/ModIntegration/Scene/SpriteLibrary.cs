@@ -69,6 +69,9 @@ namespace DoctorSimiBoss.Scene
         /// <summary>Destroy the GameObject after the last frame of a non-looping clip (one-shot effects).</summary>
         public bool DestroyWhenDone;
 
+        /// <summary>Playback speed multiplier (the boss uses its phase speed).</summary>
+        public float Speed = 1f;
+
         public void Play(Sprite[] frames, float fps, bool loop)
         {
             if (_renderer == null) _renderer = GetComponent<SpriteRenderer>();
@@ -82,7 +85,7 @@ namespace DoctorSimiBoss.Scene
         private void Update()
         {
             if (_frames == null || _frames.Length == 0) return;
-            _time += Time.deltaTime;
+            _time += Time.deltaTime * Speed;
             int index = (int)(_time * _fps);
             if (index >= _frames.Length)
             {

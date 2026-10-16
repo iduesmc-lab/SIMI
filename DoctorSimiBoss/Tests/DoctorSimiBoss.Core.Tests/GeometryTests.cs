@@ -16,9 +16,13 @@ namespace DoctorSimiBoss.Core.Tests
             Assert.Equal(0.97f, m.OriginY, 3);
             Assert.Equal(70f, m.BodyBox.Width);
             Assert.Equal(4f, m.PunchBox.X);
-            Assert.Equal(1, _def.Tuning.ContactDamage);
-            Assert.Equal(1, _def.Tuning.AttackDamage);
-            Assert.Equal(500, _def.Tuning.MaxHealth);
+            Assert.Equal(2, _def.Tuning.ContactDamage);
+            Assert.Equal(2, _def.Tuning.AttackDamage);
+            Assert.Equal(1300, _def.Tuning.MaxHealth);
+            Assert.Equal(3, _def.Tuning.MaxCombo);
+            Assert.Equal(1.3f, _def.Tuning.SpeedForPhase(3), 3);
+            Assert.Equal(1.3f, _def.Tuning.SpeedForPhase(9), 3);
+            Assert.Equal(1f, _def.Tuning.SpeedForPhase(1), 3);
             Assert.Equal("F8", m.Encounter.DebugKey);
             Assert.Empty(_def.Report.Errors);
         }

@@ -78,15 +78,34 @@ namespace DoctorSimiBoss.Core.Animation
 
         private AnimationRequest ResolveAttack(AttackDefinition attack)
         {
-            AnimationRequest request = attack != null && attack.IsSpecial
-                ? Pick(attack.PlannedAnimation, ManifestValidator.AttackPlaceholder)
-                : Make(ManifestValidator.AttackPlaceholder, false);
-            if (attack == null) return request;
+            if (attack == null) return Make(ManifestValidator.AttackPlaceholder, false);
 
-            // Stretch the clip so its damage frame lands when the attack's active part begins.
+            // Dedicated clip if it exists, else the attack's own placeholder (e.g. Spawn for jumps), else Attack.
+            string fallback = attack.PlaceholderAnimation != null && _report.IsPlayable(attack.PlaceholderAnimation)
+                ? attack.PlaceholderAnimation
+                : ManifestValidator.AttackPlaceholder;
+            AnimationRequest request = attack.PlannedAnimation != null && attack.PlannedAnimation != fallback
+                ? Pick(attack.PlannedAnimation, fallback)
+                : Make(fallback, false);
+            if (_policy == PlaceholderPolicy.IdleAndAttackOnly && request.Clip != ManifestValidator.AttackPlaceholder)
+                request = Make(ManifestValidator.AttackPlaceholder, true);
+
             var clip = _manifest.Animations[request.Clip];
             if (clip.SuggestedDamageFrame.HasValue && clip.SuggestedDamageFrame.Value > 0 && attack.Windup > 0)
+            {
+                // Stretch the clip so its damage frame lands when the active part begins.
                 request.Fps = clip.SuggestedDamageFrame.Value / attack.Windup;
+            }
+            else if (!clip.Loop && attack.Windup + attack.Active > 0)
+            {
+                // One-shot placeholder (e.g. the Spawn jump): play it across anticipation + active part.
+                request.Fps = clip.Frames.Count / (attack.Windup + attack.Active);
+            }
+            else if (clip.Loop && attack.ActiveSpeedMultiplier > 1f)
+            {
+                // Looping placeholder for fast movement (e.g. Walk for the dash): speed it up.
+                request.Fps = clip.Fps * attack.ActiveSpeedMultiplier / 2f;
+            }
             return request;
         }
 

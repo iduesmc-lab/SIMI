@@ -18,9 +18,19 @@ namespace DoctorSimiBoss.Core.Tests
         /// <summary>Fight-loop tests skip the entrance; IntroTests cover it.</summary>
         private BossStateMachine Create(IBossBrain brain, Action<BossTuning> tweak = null)
         {
-            _def.Tuning.IntroDuration = 0;
-            _def.Tuning.MaxHealth = 900; // thresholds below are written for 900 HP
-            tweak?.Invoke(_def.Tuning);
+            // Fixed behaviour-test tuning, independent of the balance values in the manifest.
+            var t = _def.Tuning;
+            t.IntroDuration = 0;
+            t.MaxHealth = 900; // thresholds below are written for 900 HP
+            t.MoveSpeed = 4f;
+            t.AttackRange = 3f;
+            t.IdleBetweenActions = 0.8f;
+            t.MoveDuration = 1.2f;
+            t.HurtDuration = 0.25f;
+            t.StunHitThreshold = 12;
+            t.StunDuration = 2.5f;
+            t.PhaseTransitionDuration = 1.5f;
+            tweak?.Invoke(t);
             return _def.CreateStateMachine(brain);
         }
 
@@ -146,8 +156,8 @@ namespace DoctorSimiBoss.Core.Tests
             var stages = new List<AttackStage>();
             m.AttackStageChanged += (a, s) => stages.Add(s);
             m.Tick(0.8f, Near);
-            // Saludo cargado: 0.8 + 0.2 + 0.9 = 1.9 s. Advancing 2.0 s ends it with 0.1 s already spent idling.
-            m.Tick(2.0f, Near);
+            // Advancing 0.1 s past the whole attack ends it with 0.1 s already spent idling.
+            m.Tick(saludo.TotalDuration + 0.1f, Near);
             Assert.Equal(BossState.Idle, m.State);
             Assert.Equal(_def.Tuning.IdleBetweenActions - 0.1f, m.TimeRemaining, 3);
             Assert.Equal(new[] { AttackStage.Windup, AttackStage.Active, AttackStage.Recovery, AttackStage.None }, stages);
@@ -256,7 +266,7 @@ namespace DoctorSimiBoss.Core.Tests
             Assert.Equal(-1, m.Facing);
             m.Tick(dash.Windup + 0.01f, -Far);
             Assert.Equal(AttackStage.Active, m.AttackStage);
-            Assert.Equal(-_def.Tuning.MoveSpeed * 3f, m.VelocityX, 3);
+            Assert.Equal(-_def.Tuning.MoveSpeed * dash.ActiveSpeedMultiplier, m.VelocityX, 3);
             m.Tick(dash.Active + dash.Recovery, -Far);
             Assert.Equal(BossState.Stun, m.State);
             Assert.Equal(0, m.VelocityX);
@@ -282,7 +292,7 @@ namespace DoctorSimiBoss.Core.Tests
         {
             var aplauso = _def.Attacks.Get("AplausoSalida");
             Assert.Equal("Aplauso de salida", aplauso.DisplayName);
-            Assert.Equal(1.6f, aplauso.Recovery, 3);
+            Assert.Equal(1.5f, aplauso.Recovery, 3);
             Assert.True(aplauso.Recovery > _def.Attacks.Get("GiroBotarga").Recovery);
         }
 

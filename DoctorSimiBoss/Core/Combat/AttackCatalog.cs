@@ -15,6 +15,8 @@ namespace DoctorSimiBoss.Core.Combat
         /// <summary>Dedicated animation once drawn (SpecialPunch...); the basic attack uses "Attack".</summary>
         public string PlannedAnimation;
         public string AssetStatus;
+        /// <summary>Clip shown while the dedicated animation does not exist; null means Attack.</summary>
+        public string PlaceholderAnimation;
         /// <summary>Anticipation time before the hitbox can deal damage.</summary>
         public float Windup;
         /// <summary>Time the hitbox (or projectiles/waves) is dangerous.</summary>
@@ -40,12 +42,15 @@ namespace DoctorSimiBoss.Core.Combat
     public sealed class AttackCatalog
     {
         public const string BasicAttackId = "GolpeBasico";
+        public const string LeapAttackId = "Brinco";
         public const string PunchImpactEffect = "PunchImpact";
 
         private readonly Dictionary<string, AttackDefinition> _byId = new Dictionary<string, AttackDefinition>();
         private readonly Dictionary<int, List<AttackDefinition>> _specialsByPhase = new Dictionary<int, List<AttackDefinition>>();
 
         public AttackDefinition Basic { get; private set; }
+        /// <summary>Jump towards the player, used to close distance instead of only walking.</summary>
+        public AttackDefinition Leap { get; private set; }
         public IEnumerable<AttackDefinition> All => _byId.Values;
 
         public AttackDefinition Get(string id)
@@ -65,6 +70,21 @@ namespace DoctorSimiBoss.Core.Combat
             var catalog = new AttackCatalog();
             catalog.Basic = CreateBasicAttack(manifest);
             catalog._byId[catalog.Basic.Id] = catalog.Basic;
+            catalog.Leap = new AttackDefinition
+            {
+                Id = LeapAttackId,
+                DisplayName = "Brinco",
+                IsSpecial = false,
+                Phase = 0,
+                PlannedAnimation = "Spawn",
+                PlaceholderAnimation = "Spawn",
+                AssetStatus = Manifest.AssetStatus.Ready,
+                Windup = 0.3f,
+                Active = 0.55f,
+                Recovery = 0.3f,
+                Ranged = true,
+            };
+            catalog._byId[catalog.Leap.Id] = catalog.Leap;
 
             foreach (var planned in manifest.PlannedSpecials)
             {
@@ -125,6 +145,7 @@ namespace DoctorSimiBoss.Core.Combat
                 Phase = planned.Phase,
                 PlannedAnimation = planned.Animation,
                 AssetStatus = planned.AssetStatus,
+                PlaceholderAnimation = planned.PlaceholderAnimation,
             };
             ApplyDesignDefaults(a);
             var t = planned.Timing;
@@ -144,11 +165,11 @@ namespace DoctorSimiBoss.Core.Combat
             switch (a.Id)
             {
                 case "SaludoCargado": // charged horizontal punch, recovery after a miss
-                    Set(a, 0.8f, 0.2f, 0.9f); a.ActiveSpeedMultiplier = 1.5f; a.ImpactEffect = PunchImpactEffect; break;
+                    Set(a, 0.8f, 0.35f, 0.8f); a.ActiveSpeedMultiplier = 4f; a.ImpactEffect = PunchImpactEffect; a.Ranged = true; break;
                 case "PisotonSimi": // short jump, ground wave on landing
                     Set(a, 0.6f, 0.4f, 0.8f); a.Ranged = true; break;
                 case "CarreraPasillo": // straight dash across the arena, brief stun when braking
-                    Set(a, 0.7f, 1.0f, 0.3f); a.ActiveSpeedMultiplier = 3f; a.SelfStunAfter = 1.2f; a.Ranged = true; break;
+                    Set(a, 0.7f, 1.3f, 0.3f); a.ActiveSpeedMultiplier = 5f; a.SelfStunAfter = 1.0f; a.Ranged = true; break;
                 case "GiroBotarga": // spinning jump, low circular wave on landing
                     Set(a, 0.6f, 0.8f, 0.8f); break;
                 case "LluviaCapsulas": // three marked lanes, always one safe gap

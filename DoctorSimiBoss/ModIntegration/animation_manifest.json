@@ -193,9 +193,10 @@
       "conceptSheet": "References/saludo_cargado_concept_sheet.png",
       "prototypeTiming": {
         "windup": 0.8,
-        "active": 0.2,
-        "recovery": 0.9
-      }
+        "active": 0.35,
+        "recovery": 0.8
+      },
+      "placeholderAnimation": "Attack"
     },
     {
       "id": "PisotonSimi",
@@ -209,10 +210,11 @@
       ],
       "conceptSheet": "References/special_attacks_concept_sheet.png",
       "prototypeTiming": {
-        "windup": 0.6,
-        "active": 0.4,
-        "recovery": 0.8
-      }
+        "windup": 0.55,
+        "active": 0.5,
+        "recovery": 0.6
+      },
+      "placeholderAnimation": "Spawn"
     },
     {
       "id": "CarreraPasillo",
@@ -227,10 +229,11 @@
       "conceptSheet": "References/special_attacks_concept_sheet.png",
       "prototypeTiming": {
         "windup": 0.7,
-        "active": 1.0,
+        "active": 1.3,
         "recovery": 0.3,
-        "selfStunAfter": 1.2
-      }
+        "selfStunAfter": 1.0
+      },
+      "placeholderAnimation": "Walk"
     },
     {
       "id": "GiroBotarga",
@@ -244,10 +247,11 @@
       ],
       "conceptSheet": "References/special_attacks_concept_sheet.png",
       "prototypeTiming": {
-        "windup": 0.6,
-        "active": 0.8,
-        "recovery": 0.8
-      }
+        "windup": 0.45,
+        "active": 0.7,
+        "recovery": 0.6
+      },
+      "placeholderAnimation": "Spawn"
     },
     {
       "id": "LluviaCapsulas",
@@ -259,10 +263,11 @@
       "conceptPoses": [],
       "conceptSheet": null,
       "prototypeTiming": {
-        "windup": 1.0,
-        "active": 1.5,
-        "recovery": 1.0
-      }
+        "windup": 0.9,
+        "active": 1.6,
+        "recovery": 0.8
+      },
+      "placeholderAnimation": "Attack"
     },
     {
       "id": "AplausoSalida",
@@ -276,27 +281,34 @@
       ],
       "conceptSheet": "References/special_attacks_concept_sheet.png",
       "prototypeTiming": {
-        "windup": 0.9,
-        "active": 2.1,
-        "recovery": 1.6
-      }
+        "windup": 0.8,
+        "active": 1.8,
+        "recovery": 1.5
+      },
+      "placeholderAnimation": "Attack"
     }
   ],
   "tuning": {
-    "note": "Prototype values in game world units; not final balance. maxHealth lowered to 500 for the first in-game tests.",
-    "maxHealth": 500,
-    "moveSpeed": 4,
-    "attackRange": 3,
-    "idleBetweenActions": 0.8,
-    "moveDuration": 1.2,
-    "hurtDuration": 0.25,
-    "stunHitThreshold": 12,
-    "stunDuration": 2.5,
-    "phaseTransitionDuration": 1.5,
-    "specialChance": 0.45,
+    "note": "Godhome-level prototype: 2 masks per hit, short pauses, punch combos, faster later phases. Values in world units; tune by playing.",
+    "maxHealth": 1300,
+    "moveSpeed": 6,
+    "attackRange": 3.2,
+    "idleBetweenActions": 0.35,
+    "moveDuration": 0.8,
+    "hurtDuration": 0,
+    "stunHitThreshold": 20,
+    "stunDuration": 2.0,
+    "phaseTransitionDuration": 1.2,
+    "specialChance": 0.5,
     "introDuration": 1.0,
-    "contactDamage": 1,
-    "attackDamage": 1
+    "contactDamage": 2,
+    "attackDamage": 2,
+    "maxCombo": 3,
+    "phaseSpeed": [
+      1.0,
+      1.15,
+      1.3
+    ]
   },
   "conceptReferences": [
     {

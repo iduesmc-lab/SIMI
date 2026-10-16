@@ -28,7 +28,7 @@ namespace DoctorSimiBoss
 
         public DoctorSimiBossMod() : base("Doctor Simi Boss") { }
 
-        public override string GetVersion() => "0.3.0-prototype";
+        public override string GetVersion() => "0.4.0-prototype";
 
         public override void Initialize()
         {

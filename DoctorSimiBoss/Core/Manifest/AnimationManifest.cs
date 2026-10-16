@@ -121,6 +121,8 @@ namespace DoctorSimiBoss.Core.Manifest
         public int FrameCount;
         public readonly List<int> ConceptPoses = new List<int>();
         public string ConceptSheet;
+        /// <summary>Existing clip shown until the dedicated animation exists (e.g. Spawn for jumps); null means Attack.</summary>
+        public string PlaceholderAnimation;
         /// <summary>Optional timing overrides; null means use the code defaults.</summary>
         public AttackTimingData Timing;
     }
@@ -155,6 +157,9 @@ namespace DoctorSimiBoss.Core.Manifest
         public float? IntroDuration;
         public int? ContactDamage;
         public int? AttackDamage;
+        public int? MaxCombo;
+        /// <summary>Speed multiplier per phase (index 0 = phase 1); null when not declared.</summary>
+        public float[] PhaseSpeed;
     }
 
     public static class AssetStatus

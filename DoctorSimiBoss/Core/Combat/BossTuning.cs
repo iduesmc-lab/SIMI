@@ -28,6 +28,19 @@ namespace DoctorSimiBoss.Core.Combat
         public int ContactDamage = 1;
         /// <summary>Masks lost when hit by an attack's active part.</summary>
         public int AttackDamage = 1;
+        /// <summary>Most punches the basic attack chains in a row (phase 1 uses fewer).</summary>
+        public int MaxCombo = 1;
+        /// <summary>Speed multiplier per phase (index 0 = phase 1). The scene layer speeds up time and motion with it.</summary>
+        public float[] PhaseSpeed = { 1f };
+
+        public float SpeedForPhase(int phase)
+        {
+            if (PhaseSpeed == null || PhaseSpeed.Length == 0) return 1f;
+            int i = phase - 1;
+            if (i < 0) i = 0;
+            if (i >= PhaseSpeed.Length) i = PhaseSpeed.Length - 1;
+            return PhaseSpeed[i] > 0 ? PhaseSpeed[i] : 1f;
+        }
 
         public static BossTuning FromData(BossTuningData data)
         {
@@ -46,6 +59,8 @@ namespace DoctorSimiBoss.Core.Combat
             if (data.IntroDuration.HasValue) t.IntroDuration = data.IntroDuration.Value;
             if (data.ContactDamage.HasValue) t.ContactDamage = data.ContactDamage.Value;
             if (data.AttackDamage.HasValue) t.AttackDamage = data.AttackDamage.Value;
+            if (data.MaxCombo.HasValue) t.MaxCombo = data.MaxCombo.Value;
+            if (data.PhaseSpeed != null && data.PhaseSpeed.Length > 0) t.PhaseSpeed = data.PhaseSpeed;
             return t;
         }
     }

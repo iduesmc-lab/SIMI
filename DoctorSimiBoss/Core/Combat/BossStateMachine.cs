@@ -39,6 +39,8 @@ namespace DoctorSimiBoss.Core.Combat
         private float _timer;
         private int _hitsSinceStun;
         private bool _started;
+        private int _comboLeft;
+        private float _lastPlayerOffsetX;
 
         public BossState State { get; private set; } = BossState.Intro;
         public int Phase { get; private set; }
@@ -97,6 +99,7 @@ namespace DoctorSimiBoss.Core.Combat
             if (State == BossState.Defeated) return;
 
             _timer -= deltaTime;
+            _lastPlayerOffsetX = playerOffsetX;
             switch (State)
             {
                 case BossState.Idle:
@@ -189,6 +192,7 @@ namespace DoctorSimiBoss.Core.Combat
                 PlayerOffsetX = playerOffsetX,
                 Tuning = _tuning,
                 BasicAttack = _attacks.Basic,
+                LeapAttack = _attacks.Leap,
                 PhaseSpecials = _attacks.SpecialsForPhase(Phase),
                 LastAttack = LastAttack,
             });
@@ -196,6 +200,7 @@ namespace DoctorSimiBoss.Core.Combat
             switch (action.Kind)
             {
                 case BossActionKind.Attack when action.Attack != null:
+                    _comboLeft = Math.Max(0, action.ComboExtra);
                     StartAttack(action.Attack, playerOffsetX);
                     break;
                 case BossActionKind.Move:
@@ -229,6 +234,17 @@ namespace DoctorSimiBoss.Core.Combat
                     SetStage(AttackStage.Recovery, CurrentAttack.Recovery);
                     break;
                 default:
+                    if (_comboLeft > 0)
+                    {
+                        // Chain the same attack straight away, re-aiming at the player.
+                        _comboLeft--;
+                        var again = CurrentAttack;
+                        float leftover = _timer;
+                        EndAttack();
+                        StartAttack(again, _lastPlayerOffsetX);
+                        _timer += leftover;
+                        break;
+                    }
                     float selfStun = CurrentAttack.SelfStunAfter;
                     float carry = _timer;
                     EndAttack();
@@ -260,6 +276,7 @@ namespace DoctorSimiBoss.Core.Combat
             State = next;
             _timer = duration;
             if (next != BossState.Move && next != BossState.Attack) VelocityX = 0;
+            if (next != BossState.Attack) _comboLeft = 0;
             StateChanged?.Invoke(previous, next);
         }
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using DoctorSimiBoss.Core.Json;
 
 namespace DoctorSimiBoss.Core.Manifest
@@ -91,6 +92,7 @@ namespace DoctorSimiBoss.Core.Manifest
                     AssetStatus = GetString(s, "assetStatus"),
                     FrameCount = (int)GetNumber(s, "frameCount", 0),
                     ConceptSheet = GetString(s, "conceptSheet"),
+                    PlaceholderAnimation = GetString(s, "placeholderAnimation"),
                 };
                 foreach (var pose in GetArray(s, "conceptPoses")) special.ConceptPoses.Add((int)ToDouble(pose, "conceptPoses[]"));
 
@@ -132,6 +134,8 @@ namespace DoctorSimiBoss.Core.Manifest
                     IntroDuration = GetOptionalFloat(tuning, "introDuration"),
                     ContactDamage = GetOptionalInt(tuning, "contactDamage"),
                     AttackDamage = GetOptionalInt(tuning, "attackDamage"),
+                    MaxCombo = GetOptionalInt(tuning, "maxCombo"),
+                    PhaseSpeed = tuning.ContainsKey("phaseSpeed") ? GetArray(tuning, "phaseSpeed").Select(v => (float)ToDouble(v, "phaseSpeed[]")).ToArray() : null,
                 };
             }
 

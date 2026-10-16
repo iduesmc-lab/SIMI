@@ -11,6 +11,8 @@ namespace DoctorSimiBoss.Core.Combat
         public BossActionKind Kind;
         public float Duration;
         public AttackDefinition Attack;
+        /// <summary>Extra repetitions of the same attack right after this one (basic punch combos).</summary>
+        public int ComboExtra;
 
         public static BossAction Idle(float duration) { return new BossAction { Kind = BossActionKind.Idle, Duration = duration }; }
         public static BossAction Move(float duration) { return new BossAction { Kind = BossActionKind.Move, Duration = duration }; }
@@ -25,6 +27,8 @@ namespace DoctorSimiBoss.Core.Combat
         public float PlayerOffsetX;
         public BossTuning Tuning;
         public AttackDefinition BasicAttack;
+        /// <summary>Jump towards the player; may be null.</summary>
+        public AttackDefinition LeapAttack;
         public IList<AttackDefinition> PhaseSpecials;
         /// <summary>Last attack performed, or null.</summary>
         public AttackDefinition LastAttack;
@@ -60,7 +64,15 @@ namespace DoctorSimiBoss.Core.Combat
             if (specials.Count > 0 && _random.NextDouble() < ctx.Tuning.SpecialChance)
                 return BossAction.Perform(specials[_random.Next(specials.Count)]);
 
-            if (inRange) return BossAction.Perform(ctx.BasicAttack);
+            if (inRange)
+            {
+                // Phase 1 chains up to 2 punches, later phases up to MaxCombo.
+                int maxCombo = Math.Max(1, Math.Min(ctx.Tuning.MaxCombo, ctx.Phase + 1));
+                var punch = BossAction.Perform(ctx.BasicAttack);
+                punch.ComboExtra = _random.Next(maxCombo);
+                return punch;
+            }
+            if (ctx.LeapAttack != null && _random.NextDouble() < 0.5) return BossAction.Perform(ctx.LeapAttack);
             return BossAction.Move(ctx.Tuning.MoveDuration);
         }
     }
