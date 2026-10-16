@@ -37,7 +37,13 @@ namespace DoctorSimiBoss.Scene
         private FramePlayer _player;
         private GameObject _contact;
         private GameObject _punch;
-        private float _velocityX;
+        private float _velocityX;      // target from the state machine
+        private float _currentVx;      // smoothed actual speed
+        private GameObject _visual;    // sprite child: deformed by the procedural animator, colliders stay on the root
+        private readonly ProceduralAnimator _motion = new ProceduralAnimator();
+        private float _spin;           // degrees, from spinning jumps
+        private float _prevY;
+        private float _ghostTimer;
         private int _facing = -1;
         private float _halfWidth;
         private float _flashTimer;
@@ -99,8 +105,12 @@ namespace DoctorSimiBoss.Scene
             float bossScale = manifest.BossScale > 0 ? manifest.BossScale : 1f;
             transform.localScale = new Vector3(bossScale, bossScale, 1f);
 
-            _renderer = gameObject.AddComponent<SpriteRenderer>();
-            _player = gameObject.AddComponent<FramePlayer>();
+            _visual = new GameObject("Visual");
+            _visual.transform.SetParent(transform, false);
+            _renderer = _visual.AddComponent<SpriteRenderer>();
+            _player = _visual.AddComponent<FramePlayer>();
+            _motion.Intensity = manifest.Motion.Intensity;
+            _prevY = transform.position.y;
             var rb = gameObject.AddComponent<Rigidbody2D>();
             rb.isKinematic = true;
 
@@ -155,6 +165,8 @@ namespace DoctorSimiBoss.Scene
             RunSchedule();
 
             var position = transform.position;
+            float accel = machine.State == BossState.Attack ? 200f : _definition.Manifest.Motion.Acceleration;
+            _currentVx = Mathf.MoveTowards(_currentVx, _velocityX, accel * bdt);
             if (_arc.Active)
             {
                 _arc.Time += bdt;
@@ -164,16 +176,22 @@ namespace DoctorSimiBoss.Scene
                     ? (p < 0.6f ? Mathf.Sin(p / 0.6f * Mathf.PI / 2f) : 1f - (p - 0.6f) / 0.4f)
                     : 4f * p * (1f - p);
                 position.y = Floor + _arc.Height * lift;
-                transform.rotation = Quaternion.Euler(0, 0, _arc.Spins * 360f * p * -_facing);
-                if (p >= 1f) EndArc();
+                _spin = _arc.Spins * 360f * p * -_facing;
+                if (p >= 1f)
+                {
+                    EndArc();
+                    _motion.Land(_arc.Slam ? 1.4f : 0.9f);
+                }
             }
             else
             {
-                position.x += _velocityX * bdt;
+                position.x += _currentVx * bdt;
                 position.y = Floor;
             }
             position.x = _origin.x + _arena.ClampX(position.x - _origin.x, _halfWidth);
             transform.position = position;
+
+            ApplyMotion(machine, bdt, position.y);
 
             bool contactOn = !machine.IsInvulnerable && machine.State != BossState.Defeated;
             if (_contact.activeSelf != contactOn) _contact.SetActive(contactOn);
@@ -208,6 +226,9 @@ namespace DoctorSimiBoss.Scene
             _stageAttack = attack;
             _stageStart = _clock;
             if (stage == AttackStage.None) { _schedule.Clear(); EndArc(); return; }
+            if (stage == AttackStage.Active && attack.Id != AttackCatalog.LeapAttackId &&
+                attack.Id != "PisotonSimi" && attack.Id != "GiroBotarga")
+                _motion.Strike(attack.IsSpecial ? 1.2f : 0.8f);
 
             var hero = HeroController.instance;
             float heroX = hero != null ? hero.transform.position.x : transform.position.x;
@@ -258,7 +279,39 @@ namespace DoctorSimiBoss.Scene
         private void EndArc()
         {
             _arc.Active = false;
-            transform.rotation = Quaternion.identity;
+            _spin = 0f;
+        }
+
+        /// <summary>Procedural squash/stretch/lean on the sprite child, plus afterimages during fast moves.</summary>
+        private void ApplyMotion(BossStateMachine machine, float bdt, float y)
+        {
+            float vy = (y - _prevY) / bdt;
+            _prevY = y;
+            var attack = machine.CurrentAttack;
+            float duration = attack == null ? 1f
+                : machine.AttackStage == AttackStage.Windup ? attack.Windup
+                : machine.AttackStage == AttackStage.Active ? attack.Active
+                : attack.Recovery;
+            float progress = duration > 0 ? (_clock - _stageStart) / duration : 1f;
+
+            _motion.Tick(bdt, machine.State, machine.AttackStage, attack, progress, _currentVx, _arc.Active, vy);
+            var pose = _motion.Pose;
+            _visual.transform.localScale = new Vector3(pose.ScaleX, pose.ScaleY, 1f);
+            _visual.transform.localPosition = new Vector3(0f, pose.OffsetY, 0f);
+            // Positive lean tilts the top towards the facing direction.
+            _visual.transform.localRotation = Quaternion.Euler(0f, 0f, _spin - _facing * pose.Lean);
+
+            bool fast = attack != null && machine.AttackStage == AttackStage.Active &&
+                        (_arc.Active || attack.ActiveSpeedMultiplier >= 3f);
+            if (fast && _definition.Manifest.Motion.Afterimages)
+            {
+                _ghostTimer -= bdt;
+                if (_ghostTimer <= 0f)
+                {
+                    _ghostTimer = 0.045f;
+                    Afterimage.Spawn(transform.parent, _renderer, _visual.transform);
+                }
+            }
         }
 
         private void At(float delay, Action run) { _schedule.Add(new Scheduled { At = _clock + Mathf.Max(0f, delay), Run = run }); }
@@ -373,6 +426,7 @@ namespace DoctorSimiBoss.Scene
             if (result == HitResult.Ignored) return;
 
             _flashTimer = FlashSeconds;
+            _motion.Hit(0.5f);
             if (damageInstance.AttackType == AttackTypes.Nail && HeroController.instance != null)
                 HeroController.instance.SoulGain();
             if (result == HitResult.Stunned) _log("Stunned (" + _driver.Machine.Health + "/" + _driver.Machine.MaxHealth + ")");
@@ -397,7 +451,7 @@ namespace DoctorSimiBoss.Scene
         public void PlayAnimation(AnimationRequest request)
         {
             var frames = _sprites.Get(request.Clip);
-            if (frames != null) _player.Play(frames, request.Fps, request.Loop);
+            if (frames != null) _player.Play(frames, request.Fps, request.Loop, request.FrameWeights);
         }
 
         public void SetFacing(int direction)

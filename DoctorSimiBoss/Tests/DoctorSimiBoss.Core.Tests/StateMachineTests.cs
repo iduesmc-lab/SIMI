@@ -101,9 +101,10 @@ namespace DoctorSimiBoss.Core.Tests
         public void BasicAttackTimingMatchesTheAttackClipDamageFrame()
         {
             var basic = _def.Attacks.Basic;
-            Assert.Equal(3f / 12f, basic.Windup, 4);
-            Assert.Equal(1f / 12f, basic.Active, 4);
-            Assert.Equal(2f / 12f, basic.Recovery, 4);
+            var clip = _def.Manifest.Animations["Attack"];
+            Assert.Equal(clip.WeightBefore(3) / 12f, basic.Windup, 4);
+            Assert.Equal(clip.WeightOf(3) / 12f, basic.Active, 4);
+            Assert.Equal((clip.TotalWeight - clip.WeightBefore(4)) / 12f, basic.Recovery, 4);
         }
 
         [Fact]
@@ -120,15 +121,15 @@ namespace DoctorSimiBoss.Core.Tests
             Assert.Equal(AttackStage.Windup, m.AttackStage);
             Assert.False(m.IsAttackHitboxActive);
 
-            m.Tick(0.26f, Near);
+            m.Tick(_def.Attacks.Basic.Windup + 0.01f, Near);
             Assert.Equal(AttackStage.Active, m.AttackStage);
             Assert.True(m.IsAttackHitboxActive);
 
-            m.Tick(0.1f, Near);
+            m.Tick(_def.Attacks.Basic.Active, Near);
             Assert.Equal(AttackStage.Recovery, m.AttackStage);
             Assert.False(m.IsAttackHitboxActive);
 
-            m.Tick(0.2f, Near);
+            m.Tick(_def.Attacks.Basic.Recovery, Near);
             Assert.Equal(BossState.Idle, m.State);
             Assert.Null(m.CurrentAttack);
             Assert.Equal(new[] { AttackStage.Windup, AttackStage.Active, AttackStage.Recovery, AttackStage.None }, stages);
@@ -358,12 +359,14 @@ namespace DoctorSimiBoss.Core.Tests
             var punch = resolver.Resolve(BossState.Attack, saludo);
             Assert.Equal("SpecialPunch", punch.Clip);
             Assert.False(punch.IsPlaceholder);
-            Assert.Equal(3f / saludo.Windup, punch.Fps, 3); // damage frame 03 lands when the active part starts
+            var punchClip = _def.Manifest.Animations["SpecialPunch"];
+            Assert.Equal(punchClip.WeightBefore(3) / saludo.Windup, punch.Fps, 3); // damage frame 03 lands when the active part starts
 
             var slamAttack = _def.Attacks.Get("PisotonSimi");
             var slam = resolver.Resolve(BossState.Attack, slamAttack);
             Assert.Equal("SpecialSlam", slam.Clip);
-            Assert.Equal(6f / (slamAttack.Windup + slamAttack.Active), slam.Fps, 3);
+            // The slam's impact frame (activeEndFrame 4) starts exactly when the jump ends.
+            Assert.Equal(_def.Manifest.Animations["SpecialSlam"].WeightBefore(4) / (slamAttack.Windup + slamAttack.Active), slam.Fps, 3);
 
             Assert.Equal("SpecialDash", resolver.Resolve(BossState.Attack, _def.Attacks.Get("CarreraPasillo")).Clip);
             Assert.Equal("Attack", _def.CreateAnimationResolver(PlaceholderPolicy.IdleAndAttackOnly).Resolve(BossState.Attack, saludo).Clip);
@@ -378,7 +381,7 @@ namespace DoctorSimiBoss.Core.Tests
             var request = resolver.Resolve(BossState.Attack, saludo);
             Assert.Equal("Attack", request.Clip);
             Assert.True(request.IsPlaceholder);
-            Assert.Equal(3f / saludo.Windup, request.Fps, 3);
+            Assert.Equal(m.Animations["Attack"].WeightBefore(3) / saludo.Windup, request.Fps, 3);
 
             var basic = resolver.Resolve(BossState.Attack, attacks.Basic);
             Assert.Equal("Attack", basic.Clip);
@@ -418,9 +421,9 @@ namespace DoctorSimiBoss.Core.Tests
 
             driver.Tick(0.8f);
             Assert.Equal("Attack", body.Animations.Last().Clip);
-            driver.Tick(0.26f);
+            driver.Tick(_def.Attacks.Basic.Windup + 0.01f);
             Assert.True(body.HitboxActive);
-            driver.Tick(0.1f);
+            driver.Tick(_def.Attacks.Basic.Active);
             Assert.False(body.HitboxActive);
 
             Assert.Equal(new[] { "anim:Idle", "anim:Attack", "hitbox-on:GolpeBasico", "effect:PunchImpact", "hitbox-off:GolpeBasico" },

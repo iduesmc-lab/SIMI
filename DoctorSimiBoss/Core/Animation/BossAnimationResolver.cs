@@ -12,6 +12,8 @@ namespace DoctorSimiBoss.Core.Animation
         public float Fps;
         /// <summary>True when the clip stands in for an animation that does not exist yet.</summary>
         public bool IsPlaceholder;
+        /// <summary>Relative frame durations from the manifest, or null for equal frames.</summary>
+        public float[] FrameWeights;
 
         public bool Equals(AnimationRequest other)
         {
@@ -94,12 +96,17 @@ namespace DoctorSimiBoss.Core.Animation
             if (clip.SuggestedDamageFrame.HasValue && clip.SuggestedDamageFrame.Value > 0 && attack.Windup > 0)
             {
                 // Stretch the clip so its damage frame lands when the active part begins.
-                request.Fps = clip.SuggestedDamageFrame.Value / attack.Windup;
+                request.Fps = clip.WeightBefore(clip.SuggestedDamageFrame.Value) / attack.Windup;
+            }
+            else if (clip.ActiveEndFrame.HasValue && attack.Windup + attack.Active > 0)
+            {
+                // Landing/impact pose starts exactly when the active part (the jump) ends.
+                request.Fps = clip.WeightBefore(clip.ActiveEndFrame.Value) / (attack.Windup + attack.Active);
             }
             else if (!clip.Loop && attack.Windup + attack.Active > 0)
             {
                 // One-shot placeholder (e.g. the Spawn jump): play it across anticipation + active part.
-                request.Fps = clip.Frames.Count / (attack.Windup + attack.Active);
+                request.Fps = clip.TotalWeight / (attack.Windup + attack.Active);
             }
             else if (clip.Loop && attack.ActiveSpeedMultiplier > 1f)
             {
@@ -119,7 +126,7 @@ namespace DoctorSimiBoss.Core.Animation
         private AnimationRequest Make(string clipName, bool isPlaceholder)
         {
             var clip = _manifest.Animations[clipName];
-            return new AnimationRequest { Clip = clipName, Loop = clip.Loop, Fps = clip.Fps, IsPlaceholder = isPlaceholder };
+            return new AnimationRequest { Clip = clipName, Loop = clip.Loop, Fps = clip.Fps, IsPlaceholder = isPlaceholder, FrameWeights = clip.FrameWeights };
         }
     }
 }

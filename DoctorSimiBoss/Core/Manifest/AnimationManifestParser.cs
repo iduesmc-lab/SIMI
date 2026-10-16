@@ -183,6 +183,14 @@ namespace DoctorSimiBoss.Core.Manifest
                 manifest.ColorGrade = g;
             }
 
+            var motion = GetObject(root, "motion");
+            if (motion != null)
+            {
+                manifest.Motion.Intensity = (float)GetNumber(motion, "intensity", 1);
+                manifest.Motion.Acceleration = (float)GetNumber(motion, "acceleration", 45);
+                manifest.Motion.Afterimages = GetBool(motion, "afterimages", true);
+            }
+
             var encounter = GetObject(root, "encounter");
             if (encounter != null)
             {
@@ -211,6 +219,10 @@ namespace DoctorSimiBoss.Core.Manifest
                 };
                 if (c.ContainsKey("suggestedDamageFrame"))
                     clip.SuggestedDamageFrame = (int)GetNumber(c, "suggestedDamageFrame", 0);
+                if (c.ContainsKey("activeEndFrame"))
+                    clip.ActiveEndFrame = (int)GetNumber(c, "activeEndFrame", 0);
+                if (c.ContainsKey("frameWeights"))
+                    clip.FrameWeights = GetArray(c, "frameWeights").Select(v => (float)ToDouble(v, "frameWeights[]")).ToArray();
                 var size = GetObject(c, "frameSize");
                 if (size != null)
                 {

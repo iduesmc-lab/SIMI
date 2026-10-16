@@ -115,10 +115,11 @@ namespace DoctorSimiBoss.Core.Combat
             if (manifest.Animations.TryGetValue(ManifestValidator.AttackPlaceholder, out var clip) &&
                 clip.Fps > 0 && clip.Frames.Count > 0)
             {
+                // Frame weights (held key poses) shift the timings: the hitbox opens exactly on the damage frame.
                 int damageFrame = clip.SuggestedDamageFrame ?? clip.Frames.Count / 2;
-                windup = damageFrame / clip.Fps;
-                active = 1f / clip.Fps;
-                recovery = Math.Max(0, clip.Frames.Count - damageFrame - 1) / clip.Fps;
+                windup = clip.WeightBefore(damageFrame) / clip.Fps;
+                active = clip.WeightOf(damageFrame) / clip.Fps;
+                recovery = Math.Max(0f, clip.TotalWeight - clip.WeightBefore(damageFrame + 1)) / clip.Fps;
             }
             return new AttackDefinition
             {

@@ -140,4 +140,37 @@ namespace DoctorSimiBoss.Scene
             _renderer.color = new Color(1f, 1f, 1f, 0.55f + 0.45f * Mathf.Sin(_age * 18f));
         }
     }
+
+    /// <summary>Fading copy of the boss sprite left behind during dashes, lunges and jumps.</summary>
+    internal sealed class Afterimage : MonoBehaviour
+    {
+        private const float Life = 0.25f;
+        private SpriteRenderer _renderer;
+        private float _age;
+
+        public static void Spawn(Transform parent, SpriteRenderer source, Transform visual)
+        {
+            if (source.sprite == null) return;
+            var go = new GameObject("Afterimage");
+            go.transform.SetParent(parent, true);
+            go.transform.position = visual.position + new Vector3(0f, 0f, 0.02f);
+            go.transform.rotation = visual.rotation;
+            go.transform.localScale = visual.lossyScale;
+            var ghost = go.AddComponent<Afterimage>();
+            ghost._renderer = go.AddComponent<SpriteRenderer>();
+            ghost._renderer.sprite = source.sprite;
+            ghost._renderer.flipX = source.flipX;
+            ghost._renderer.sortingOrder = -1;
+            ghost._renderer.color = new Color(1f, 0.85f, 0.45f, 0.45f);
+        }
+
+        private void Update()
+        {
+            _age += Time.deltaTime;
+            if (_age >= Life) { Destroy(gameObject); return; }
+            var c = _renderer.color;
+            c.a = 0.45f * (1f - _age / Life);
+            _renderer.color = c;
+        }
+    }
 }

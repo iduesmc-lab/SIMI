@@ -49,6 +49,18 @@ namespace DoctorSimiBoss.Core.Manifest
 
         /// <summary>Colour adjustment for boss and effect sprites; disabled when the manifest has no "colorGrade" block.</summary>
         public DoctorSimiBoss.Core.Animation.ColorGrade ColorGrade = DoctorSimiBoss.Core.Animation.ColorGrade.None;
+
+        /// <summary>Procedural motion settings ("motion" block).</summary>
+        public MotionSettings Motion = new MotionSettings();
+    }
+
+    public sealed class MotionSettings
+    {
+        /// <summary>Strength of squash/stretch/lean effects; 0 disables them.</summary>
+        public float Intensity = 1f;
+        /// <summary>Horizontal acceleration in units/s² for walking starts and stops.</summary>
+        public float Acceleration = 45f;
+        public bool Afterimages = true;
     }
 
     /// <summary>
@@ -98,6 +110,8 @@ namespace DoctorSimiBoss.Core.Manifest
         public bool Loop;
         public float Fps;
         public int? SuggestedDamageFrame;
+        /// <summary>Frame that should start exactly when an attack's active part ends (landing, slam impact); null if none.</summary>
+        public int? ActiveEndFrame;
         /// <summary>Per-clip frame size; null means the manifest's frameSize.</summary>
         public int? FrameWidth;
         public int? FrameHeight;
@@ -105,6 +119,26 @@ namespace DoctorSimiBoss.Core.Manifest
         public float? OriginX;
         public float? OriginY;
         public readonly List<string> Frames = new List<string>();
+        /// <summary>
+        /// Relative duration of each frame (1 = normal); null means all equal. Lets key poses
+        /// (anticipation, impact, landing) hold longer while in-betweens pass quickly.
+        /// </summary>
+        public float[] FrameWeights;
+
+        public float WeightOf(int frame)
+        {
+            return FrameWeights != null && frame >= 0 && frame < FrameWeights.Length ? FrameWeights[frame] : 1f;
+        }
+
+        /// <summary>Sum of the weights of the frames before <paramref name="frame"/>.</summary>
+        public float WeightBefore(int frame)
+        {
+            float sum = 0;
+            for (int i = 0; i < frame && i < Frames.Count; i++) sum += WeightOf(i);
+            return sum;
+        }
+
+        public float TotalWeight => WeightBefore(Frames.Count);
     }
 
     public sealed class EncounterPhase

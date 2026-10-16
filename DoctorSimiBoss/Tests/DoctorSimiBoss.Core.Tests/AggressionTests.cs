@@ -93,7 +93,7 @@ namespace DoctorSimiBoss.Core.Tests
             var pisoton = attacks.Get("PisotonSimi");
             var slam = r.Resolve(BossState.Attack, pisoton);
             Assert.Equal("Spawn", slam.Clip);
-            Assert.Equal(6f / (pisoton.Windup + pisoton.Active), slam.Fps, 3);
+            Assert.Equal(m.Animations["Spawn"].WeightBefore(4) / (pisoton.Windup + pisoton.Active), slam.Fps, 3);
 
             var dash = r.Resolve(BossState.Attack, attacks.Get("CarreraPasillo"));
             Assert.Equal("Walk", dash.Clip);

@@ -171,6 +171,11 @@ namespace DoctorSimiBoss.Core.Manifest
             var check = new ClipCheck { Name = clip.Name, Kind = kind, DeclaredFrames = clip.Frames.Count };
             if (clip.Frames.Count == 0) report.Errors.Add(kind + " '" + clip.Name + "' declares no frames");
             if (clip.Fps <= 0) report.Errors.Add(kind + " '" + clip.Name + "' has no positive fps");
+            if (clip.ActiveEndFrame.HasValue && (clip.ActiveEndFrame < 1 || clip.ActiveEndFrame >= clip.Frames.Count))
+                report.Errors.Add(kind + " '" + clip.Name + "' activeEndFrame is outside its frames");
+            if (clip.FrameWeights != null &&
+                (clip.FrameWeights.Length != clip.Frames.Count || clip.FrameWeights.Any(w => w <= 0)))
+                report.Errors.Add(kind + " '" + clip.Name + "' frameWeights must have one positive value per frame");
             if (clip.SuggestedDamageFrame.HasValue &&
                 (clip.SuggestedDamageFrame < 0 || clip.SuggestedDamageFrame >= clip.Frames.Count))
                 report.Errors.Add(kind + " '" + clip.Name + "' suggestedDamageFrame is outside its frames");

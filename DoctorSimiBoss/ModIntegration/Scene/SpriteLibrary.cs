@@ -81,6 +81,8 @@ namespace DoctorSimiBoss.Scene
         private float _fps;
         private bool _loop;
         private float _time;
+        private float[] _weights;
+        private float _totalWeight;
 
         /// <summary>Destroy the GameObject after the last frame of a non-looping clip (one-shot effects).</summary>
         public bool DestroyWhenDone;
@@ -88,13 +90,17 @@ namespace DoctorSimiBoss.Scene
         /// <summary>Playback speed multiplier (the boss uses its phase speed).</summary>
         public float Speed = 1f;
 
-        public void Play(Sprite[] frames, float fps, bool loop)
+        /// <param name="weights">Relative frame durations (manifest frameWeights), or null for equal frames.</param>
+        public void Play(Sprite[] frames, float fps, bool loop, float[] weights = null)
         {
             if (_renderer == null) _renderer = GetComponent<SpriteRenderer>();
             _frames = frames;
             _fps = fps > 0 ? fps : 10f;
             _loop = loop;
             _time = 0;
+            _weights = weights != null && frames != null && weights.Length == frames.Length ? weights : null;
+            _totalWeight = 0;
+            if (_weights != null) foreach (var w in _weights) _totalWeight += w;
             if (_frames != null && _frames.Length > 0) _renderer.sprite = _frames[0];
         }
 
@@ -102,7 +108,7 @@ namespace DoctorSimiBoss.Scene
         {
             if (_frames == null || _frames.Length == 0) return;
             _time += Time.deltaTime * Speed;
-            int index = (int)(_time * _fps);
+            int index = _weights == null ? (int)(_time * _fps) : WeightedIndex(_time * _fps);
             if (index >= _frames.Length)
             {
                 if (_loop) index %= _frames.Length;
@@ -113,6 +119,19 @@ namespace DoctorSimiBoss.Scene
                 }
             }
             _renderer.sprite = _frames[index];
+        }
+
+        /// <summary>Frame for a position measured in weight units (frames.Length when past the end).</summary>
+        private int WeightedIndex(float position)
+        {
+            if (_loop && _totalWeight > 0) position %= _totalWeight;
+            float sum = 0;
+            for (int i = 0; i < _weights.Length; i++)
+            {
+                sum += _weights[i];
+                if (position < sum) return i;
+            }
+            return _frames.Length;
         }
     }
 }
