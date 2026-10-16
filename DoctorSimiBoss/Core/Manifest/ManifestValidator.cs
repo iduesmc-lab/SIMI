@@ -191,7 +191,7 @@ namespace DoctorSimiBoss.Core.Manifest
                     continue;
                 }
 
-                string problem = CheckPng(path, manifest.FrameWidth, manifest.FrameHeight);
+                string problem = CheckPng(path, clip.FrameWidth ?? manifest.FrameWidth, clip.FrameHeight ?? manifest.FrameHeight);
                 if (problem != null)
                 {
                     check.InvalidFrames.Add(frame);

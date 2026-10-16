@@ -12,10 +12,10 @@ namespace DoctorSimiBoss.Core.Tests
         public void ManifestDeclaresScaleHitboxesDamageAndKey()
         {
             var m = _def.Manifest;
-            Assert.Equal(32f, m.SpritePixelsPerUnit);
+            Assert.Equal(64f, m.SpritePixelsPerUnit);
             Assert.Equal(0.97f, m.OriginY, 3);
-            Assert.Equal(70f, m.BodyBox.Width);
-            Assert.Equal(4f, m.PunchBox.X);
+            Assert.Equal(120f, m.BodyBox.Width);
+            Assert.Equal(40f, m.PunchBox.X);
             Assert.Equal(2, _def.Tuning.ContactDamage);
             Assert.Equal(2, _def.Tuning.AttackDamage);
             Assert.Equal(1300, _def.Tuning.MaxHealth);
@@ -31,11 +31,11 @@ namespace DoctorSimiBoss.Core.Tests
         public void BodyBoxSitsOnThePivotAndHasTheExpectedSize()
         {
             var box = FrameGeometry.ToLocal(_def.Manifest, _def.Manifest.BodyBox, -1);
-            Assert.Equal(70f / 32f, box.Width, 3);
-            Assert.Equal(114f / 32f, box.Height, 3);
-            // Pivot row = 0.97 * 128 = 124.16; box spans rows 10..124, so its bottom is ~0 units from the feet.
-            Assert.Equal((124.16f - 67f) / 32f, box.CenterY, 3);
-            Assert.Equal((65f - 64f) / 32f, box.CenterX, 3);
+            Assert.Equal(120f / 64f, box.Width, 3);
+            Assert.Equal(215f / 64f, box.Height, 3);
+            // Pivot row = 0.97 * 320 = 310.4; box spans rows 95..310, so its bottom sits on the feet.
+            Assert.Equal((310.4f - 202.5f) / 64f, box.CenterY, 3);
+            Assert.Equal(0f, box.CenterX, 3);
         }
 
         [Fact]
@@ -54,7 +54,7 @@ namespace DoctorSimiBoss.Core.Tests
         public void HitboxOutsideTheFrameIsAnError()
         {
             var m = AnimationManifestParser.Parse(TestSupport.ManifestJson);
-            m.PunchBox.X = 120;
+            m.PunchBox.X = 300;
             var report = ManifestValidator.Validate(m, ManifestPaths.ForSourcePackage(TestSupport.PackageRoot));
             Assert.Contains(report.Errors, e => e.Contains("hitboxes.punch"));
         }

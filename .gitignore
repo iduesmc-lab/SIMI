@@ -6,3 +6,7 @@ obj/
 
 # Game assemblies are copyrighted and machine-specific: never commit them.
 DoctorSimiBoss/ModIntegration/HollowKnightManaged/
+
+# Python bytecode
+__pycache__/
+*.pyc

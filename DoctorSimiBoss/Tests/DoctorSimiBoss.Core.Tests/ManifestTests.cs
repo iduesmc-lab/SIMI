@@ -42,10 +42,15 @@ namespace DoctorSimiBoss.Core.Tests
         {
             var m = AnimationManifestParser.Parse(TestSupport.ManifestJson);
 
-            Assert.Equal(128, m.FrameWidth);
-            Assert.Equal(128, m.FrameHeight);
+            Assert.Equal(320, m.FrameWidth);
+            Assert.Equal(320, m.FrameHeight);
             Assert.Equal("left", m.SpriteFacing);
-            Assert.Equal(new[] { "Spawn", "Idle", "Walk", "Attack", "Hurt", "Stun", "Defeat" }, m.Animations.Keys.ToArray());
+            Assert.Equal(new[] { "Spawn", "Idle", "Walk", "Attack", "Hurt", "Stun", "Defeat",
+                                 "SpecialPunch", "SpecialSlam", "SpecialDash", "SpecialSpin", "SpecialCapsules", "SpecialWave" },
+                         m.Animations.Keys.ToArray());
+            Assert.Equal(new[] { "PunchImpact", "Shockwave", "Capsule", "CapsuleBurst" }, m.Effects.Keys.ToArray());
+            Assert.Equal(256, m.Effects["Shockwave"].FrameWidth);
+            Assert.Equal(0.97f, m.Effects["Shockwave"].OriginY.Value, 3);
             Assert.Equal(3, m.Animations["Attack"].SuggestedDamageFrame);
             Assert.True(m.Effects.ContainsKey("PunchImpact"));
 
@@ -55,13 +60,13 @@ namespace DoctorSimiBoss.Core.Tests
             Assert.Equal(new[] { "LluviaCapsulas", "AplausoSalida" }, m.Phases[2].Specials);
 
             Assert.Equal(6, m.PlannedSpecials.Count);
-            Assert.All(m.PlannedSpecials, s => Assert.NotEqual(AssetStatus.Ready, s.AssetStatus));
+            Assert.All(m.PlannedSpecials, s => Assert.Equal(AssetStatus.Ready, s.AssetStatus));
             Assert.Equal(1300, m.Tuning.MaxHealth);
             Assert.Contains(m.ConceptReferences, c => c.Path == "References/special_attacks_concept_sheet.png");
         }
 
         [Fact]
-        public void EveryDeclaredFrameExistsAndIs128Png()
+        public void EveryDeclaredFrameExistsAndHasItsDeclaredSize()
         {
             var definition = TestSupport.LoadRealDefinition();
             var report = definition.Report;
@@ -70,16 +75,28 @@ namespace DoctorSimiBoss.Core.Tests
             Assert.Empty(report.Warnings);
             Assert.True(definition.CanRun);
             Assert.True(report.PlaceholdersAvailable);
-            Assert.Equal(8, report.Clips.Count);
+            Assert.Equal(17, report.Clips.Count);
             Assert.All(report.Clips, c => Assert.True(c.IsPlayable, c.Name));
-            Assert.Equal(48, report.Clips.Sum(c => c.DeclaredFrames));
+            Assert.Equal(13 * 6 + 3 * 6 + 2, report.Clips.Sum(c => c.DeclaredFrames));
         }
 
         [Fact]
-        public void AllSpecialsUseTheAttackPlaceholderForNow()
+        public void AllSpecialsUseTheirOwnHdAnimation()
         {
             var report = TestSupport.LoadRealDefinition().Report;
             Assert.Equal(6, report.Specials.Count);
+            Assert.All(report.Specials, s =>
+            {
+                Assert.True(s.HasPlayableAnimation, s.Id);
+                Assert.Equal(s.PlannedAnimation, s.AnimationUsed);
+            });
+        }
+
+        [Fact]
+        public void WithoutSpecialSpritesEverySpecialFallsBackToAttack()
+        {
+            var report = TestSupport.WithoutSpecialSprites().Report;
+            Assert.Empty(report.Errors);
             Assert.All(report.Specials, s =>
             {
                 Assert.False(s.HasPlayableAnimation);
@@ -110,7 +127,7 @@ namespace DoctorSimiBoss.Core.Tests
             string root = TestSupport.CopyPackageToTemp();
             try
             {
-                File.Delete(Path.Combine(root, "Sprites", "Walk", "walk_03.png"));
+                File.Delete(Path.Combine(root, "SpritesHD", "Walk", "walk_03.png"));
                 var def = BossDefinition.FromJson(TestSupport.ManifestJson, ManifestPaths.ForSourcePackage(root));
 
                 Assert.False(def.Report.IsPlayable("Walk"));
@@ -127,7 +144,7 @@ namespace DoctorSimiBoss.Core.Tests
             string root = TestSupport.CopyPackageToTemp();
             try
             {
-                File.Delete(Path.Combine(root, "Sprites", "Idle", "idle_00.png"));
+                File.Delete(Path.Combine(root, "SpritesHD", "Idle", "idle_00.png"));
                 var def = BossDefinition.FromJson(TestSupport.ManifestJson, ManifestPaths.ForSourcePackage(root));
 
                 Assert.False(def.Report.PlaceholdersAvailable);
@@ -144,13 +161,13 @@ namespace DoctorSimiBoss.Core.Tests
             try
             {
                 // Swap a frame for a 384x256 spritesheet and another for a text file.
-                File.Copy(Path.Combine(root, "Sprites", "Hurt", "hurt_spritesheet_128.png"), Path.Combine(root, "Sprites", "Hurt", "hurt_02.png"), true);
-                File.WriteAllText(Path.Combine(root, "Sprites", "Stun", "stun_01.png"), "not an image, just some text");
+                File.Copy(Path.Combine(root, "SpritesHD", "Hurt", "hurt_spritesheet.png"), Path.Combine(root, "SpritesHD", "Hurt", "hurt_02.png"), true);
+                File.WriteAllText(Path.Combine(root, "SpritesHD", "Stun", "stun_01.png"), "not an image, just some text");
                 var report = ManifestValidator.Validate(AnimationManifestParser.Parse(TestSupport.ManifestJson), ManifestPaths.ForSourcePackage(root));
 
                 Assert.False(report.IsPlayable("Hurt"));
                 Assert.False(report.IsPlayable("Stun"));
-                Assert.Contains(report.Warnings, w => w.Contains("384x256"));
+                Assert.Contains(report.Warnings, w => w.Contains("1920x320"));
                 Assert.Contains(report.Warnings, w => w.Contains("not a PNG"));
             }
             finally { Directory.Delete(root, true); }

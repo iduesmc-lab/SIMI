@@ -6,6 +6,7 @@ using DoctorSimiBoss.Core.Animation;
 using DoctorSimiBoss.Core.Combat;
 using DoctorSimiBoss.Core.Hosting;
 using DoctorSimiBoss.Core.Manifest;
+using DoctorSimiBoss.Core.Combat;
 
 namespace DoctorSimiBoss.Core.Tests
 {
@@ -36,11 +37,26 @@ namespace DoctorSimiBoss.Core.Tests
             return BossDefinition.Load(ManifestPath, ManifestPaths.ForSourcePackage(PackageRoot));
         }
 
-        /// <summary>Copies the real Sprites, Effects and Arena into a temp folder that tests may damage.</summary>
+        /// <summary>
+        /// The real manifest with the dedicated special clips removed and the specials marked concept-only,
+        /// as it was before the HD art existed: exercises the placeholder fallbacks.
+        /// </summary>
+        public static (AnimationManifest Manifest, ManifestReport Report, AttackCatalog Attacks) WithoutSpecialSprites()
+        {
+            var m = AnimationManifestParser.Parse(ManifestJson);
+            foreach (var special in m.PlannedSpecials)
+            {
+                m.Animations.Remove(special.Animation);
+                special.AssetStatus = AssetStatus.ConceptOnly;
+            }
+            return (m, ManifestValidator.Validate(m, ManifestPaths.ForSourcePackage(PackageRoot)), AttackCatalog.FromManifest(m));
+        }
+
+        /// <summary>Copies the shipped SpritesHD and Arena folders into a temp folder that tests may damage.</summary>
         public static string CopyPackageToTemp()
         {
             string target = Path.Combine(Path.GetTempPath(), "simi-tests-" + Guid.NewGuid().ToString("N"));
-            foreach (var sub in new[] { "Sprites", "Effects", "Arena" })
+            foreach (var sub in new[] { "SpritesHD", "Arena" })
                 CopyDirectory(Path.Combine(PackageRoot, sub), Path.Combine(target, sub));
             return target;
         }

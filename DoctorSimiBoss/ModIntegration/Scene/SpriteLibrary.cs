@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using DoctorSimiBoss.Core;
+using DoctorSimiBoss.Core.Animation;
 using DoctorSimiBoss.Core.Manifest;
 using UnityEngine;
 
@@ -28,29 +29,44 @@ namespace DoctorSimiBoss.Scene
             // Manifest origin is measured from the top-left of the frame; Unity pivots start at the bottom-left.
             var bossPivot = new Vector2(manifest.OriginX, 1f - manifest.OriginY);
             float bossPpu = manifest.SpritePixelsPerUnit > 0 ? manifest.SpritePixelsPerUnit : 32f;
+            // Small pixel-art frames stay crisp; large painted frames are smoothed.
+            var filter = manifest.FrameWidth >= 256 ? FilterMode.Bilinear : FilterMode.Point;
 
             foreach (var check in definition.Report.Clips)
             {
                 if (!check.IsPlayable) continue;
                 var clip = check.Kind == ClipKind.Animation ? manifest.Animations[check.Name] : manifest.Effects[check.Name];
                 var pivot = check.Kind == ClipKind.Animation ? bossPivot : new Vector2(0.5f, 0.5f);
+                if (clip.OriginX.HasValue || clip.OriginY.HasValue)
+                    pivot = new Vector2(clip.OriginX ?? 0.5f, 1f - (clip.OriginY ?? 0.5f));
                 var frames = new Sprite[clip.Frames.Count];
                 for (int i = 0; i < frames.Length; i++)
-                    frames[i] = LoadSprite(resolve(clip.Frames[i]), pivot, bossPpu, FilterMode.Point);
+                    frames[i] = LoadSprite(resolve(clip.Frames[i]), pivot, bossPpu, filter, manifest.ColorGrade);
                 library._clips[check.Name] = frames;
             }
 
             if (manifest.Arena != null)
-                library.Background = LoadSprite(resolve(manifest.Arena.Background), Vector2.zero, manifest.Arena.PixelsPerUnit, FilterMode.Bilinear);
+                library.Background = LoadSprite(resolve(manifest.Arena.Background), Vector2.zero, manifest.Arena.PixelsPerUnit, FilterMode.Bilinear, ColorGrade.None);
 
             return library;
         }
 
-        private static Sprite LoadSprite(string path, Vector2 pivot, float pixelsPerUnit, FilterMode filter)
+        private static Sprite LoadSprite(string path, Vector2 pivot, float pixelsPerUnit, FilterMode filter, ColorGrade grade)
         {
             var texture = new Texture2D(2, 2, TextureFormat.RGBA32, false);
             if (!ImageConversion.LoadImage(texture, File.ReadAllBytes(path)))
                 throw new InvalidOperationException("Unity could not decode " + path);
+            if (grade.Enabled)
+            {
+                var pixels = texture.GetPixels32();
+                for (int i = 0; i < pixels.Length; i++)
+                {
+                    if (pixels[i].a == 0) continue;
+                    grade.Apply(ref pixels[i].r, ref pixels[i].g, ref pixels[i].b);
+                }
+                texture.SetPixels32(pixels);
+                texture.Apply();
+            }
             texture.filterMode = filter;
             texture.wrapMode = TextureWrapMode.Clamp;
             return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), pivot, pixelsPerUnit);

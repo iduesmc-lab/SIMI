@@ -44,6 +44,9 @@ namespace DoctorSimiBoss.Core.Manifest
 
         /// <summary>How the fight is reached and starts; null when the manifest has no "encounter" block.</summary>
         public EncounterInfo Encounter;
+
+        /// <summary>Colour adjustment for boss and effect sprites; disabled when the manifest has no "colorGrade" block.</summary>
+        public DoctorSimiBoss.Core.Animation.ColorGrade ColorGrade = DoctorSimiBoss.Core.Animation.ColorGrade.None;
     }
 
     /// <summary>
@@ -93,6 +96,12 @@ namespace DoctorSimiBoss.Core.Manifest
         public bool Loop;
         public float Fps;
         public int? SuggestedDamageFrame;
+        /// <summary>Per-clip frame size; null means the manifest's frameSize.</summary>
+        public int? FrameWidth;
+        public int? FrameHeight;
+        /// <summary>Per-clip normalized pivot from the top-left; null means the default (manifest origin for animations, centre for effects).</summary>
+        public float? OriginX;
+        public float? OriginY;
         public readonly List<string> Frames = new List<string>();
     }
 

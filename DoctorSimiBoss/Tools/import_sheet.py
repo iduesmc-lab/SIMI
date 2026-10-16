@@ -56,6 +56,79 @@ def alpha_bbox(img, threshold):
     return img.getchannel("A").point(lambda v: 255 if v > threshold else 0).getbbox()
 
 
+def segment_by_components(keyed, cols, rows, threshold, step=4, merge=1, min_pixels=6):
+    """Split a keyed sheet into one image per grid cell using connected components.
+
+    Poses drawn by AI often cross the grid lines a little (boots, punches, sparks), so cutting
+    on the grid would chop them. Instead the opaque mask is downsampled by `step`, dilated by
+    `merge` cells so sparks join their pose, labelled, and each component goes to the cell that
+    contains its centre. Each cell's image keeps only its own components.
+    """
+    w, h = keyed.size
+    sw, sh = (w + step - 1) // step, (h + step - 1) // step
+    alpha = keyed.getchannel("A").point(lambda v: 255 if v > threshold else 0).resize((sw, sh), Image.BOX)
+    occ = [[alpha.getpixel((x, y)) > 0 for x in range(sw)] for y in range(sh)]
+    grown = [[False] * sw for _ in range(sh)]
+    for y in range(sh):
+        for x in range(sw):
+            if occ[y][x]:
+                for yy in range(max(0, y - merge), min(sh, y + merge + 1)):
+                    row = grown[yy]
+                    for xx in range(max(0, x - merge), min(sw, x + merge + 1)):
+                        row[xx] = True
+    label = [[-1] * sw for _ in range(sh)]
+    comps = []
+    for y in range(sh):
+        for x in range(sw):
+            if not grown[y][x] or label[y][x] >= 0:
+                continue
+            idx = len(comps)
+            stack, cells, real = [(x, y)], [], 0
+            label[y][x] = idx
+            while stack:
+                cx, cy = stack.pop()
+                cells.append((cx, cy))
+                if occ[cy][cx]:
+                    real += 1
+                for nx, ny in ((cx + 1, cy), (cx - 1, cy), (cx, cy + 1), (cx, cy - 1)):
+                    if 0 <= nx < sw and 0 <= ny < sh and grown[ny][nx] and label[ny][nx] < 0:
+                        label[ny][nx] = idx
+                        stack.append((nx, ny))
+            comps.append((cells, real))
+
+    cw, ch = sw / cols, sh / rows
+    owner = []
+    for cells, real in comps:
+        if real < min_pixels:
+            owner.append(None)
+            continue
+        occ_cells = [(x, y) for x, y in cells if occ[y][x]]
+        mx = sum(x for x, _ in occ_cells) / len(occ_cells)
+        my = sum(y for _, y in occ_cells) / len(occ_cells)
+        owner.append(min(rows - 1, int(my // ch)) * cols + min(cols - 1, int(mx // cw)))
+
+    results = []
+    for cell_index in range(cols * rows):
+        mine = [i for i, o in enumerate(owner) if o == cell_index]
+        if not mine:
+            results.append(None)
+            continue
+        xs = [x for i in mine for x, _ in comps[i][0]]
+        ys = [y for i in mine for _, y in comps[i][0]]
+        box = (min(xs) * step, min(ys) * step, min(w, (max(xs) + 1) * step), min(h, (max(ys) + 1) * step))
+        crop = keyed.crop(box)
+        px = crop.load()
+        keep = set(mine)
+        for yy in range(crop.height):
+            ly = min(sh - 1, (yy + box[1]) // step)
+            for xx in range(crop.width):
+                lx = min(sw - 1, (xx + box[0]) // step)
+                if label[ly][lx] not in keep:
+                    px[xx, yy] = (0, 0, 0, 0)
+        results.append(crop)
+    return results
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("sheet", help="sheet image (PNG/JPG/WEBP)")
@@ -74,22 +147,34 @@ def main():
     ap.add_argument("--fps", type=float, default=10.0, help="preview GIF speed")
     ap.add_argument("--no-scale-lock", action="store_true",
                     help="scale every frame to --char-height on its own (default keeps one scale for the animation)")
+    ap.add_argument("--scale", type=float,
+                    help="fixed source-to-frame scale for every frame (use the same value for all animations "
+                         "of a character so it keeps its size); overrides --char-height")
+    ap.add_argument("--anchor", choices=["bottom", "center"], default="bottom",
+                    help="bottom: feet on --baseline (characters, ground waves); center: centred (impacts, bursts)")
+    ap.add_argument("--merge", type=int, default=1,
+                    help="components closer than about 4*merge px are joined (default 1)")
+    ap.add_argument("--segment", choices=["components", "grid"], default="components",
+                    help="components (default) keeps poses that cross the grid lines whole; grid cuts on the lines")
     args = ap.parse_args()
 
     sheet = Image.open(args.sheet).convert("RGBA")
     count = args.frames or args.cols * args.rows
     cw, ch = sheet.width / args.cols, sheet.height / args.rows
 
+    key = None if args.key.lower() == "none" else tuple(int(args.key.lstrip("#")[i:i + 2], 16) for i in (0, 2, 4))
+    keyed = chroma_to_alpha(sheet, key, args.tolerance, args.softness) if key else sheet
+
+    if args.segment == "components":
+        parts = segment_by_components(keyed, args.cols, args.rows, args.alpha_threshold, merge=args.merge)[:count]
+    else:
+        parts = [keyed.crop((round((i % args.cols) * cw), round((i // args.cols) * ch),
+                             round((i % args.cols + 1) * cw), round((i // args.cols + 1) * ch))) for i in range(count)]
     cells = []
-    for i in range(count):
-        c, r = i % args.cols, i // args.cols
-        cell = sheet.crop((round(c * cw), round(r * ch), round((c + 1) * cw), round((r + 1) * ch)))
-        if args.key.lower() != "none":
-            k = args.key.lstrip("#")
-            cell = chroma_to_alpha(cell, (int(k[0:2], 16), int(k[2:4], 16), int(k[4:6], 16)), args.tolerance, args.softness)
-        box = alpha_bbox(cell, args.alpha_threshold)
+    for i, cell in enumerate(parts):
+        box = alpha_bbox(cell, args.alpha_threshold) if cell is not None else None
         if box is None:
-            sys.exit(f"cell {i} (col {c}, row {r}) is empty after removing the background")
+            sys.exit(f"cell {i} (col {i % args.cols}, row {i // args.cols}) is empty after removing the background")
         cells.append(cell.crop(box))
 
     tallest = max(img.height for img in cells)
@@ -97,14 +182,19 @@ def main():
     base_y = round(args.baseline * fs)
     frames = []
     for i, img in enumerate(cells):
-        scale = (args.char_height / img.height) if args.no_scale_lock else (args.char_height / tallest)
+        if args.scale:
+            scale = args.scale
+        else:
+            scale = (args.char_height / img.height) if args.no_scale_lock else (args.char_height / tallest)
         sized = img.resize((max(1, round(img.width * scale)), max(1, round(img.height * scale))), Image.LANCZOS)
-        if sized.width > fs or sized.height > base_y:
+        limit_h = fs if args.anchor == "center" else base_y
+        if sized.width > fs or sized.height > limit_h:
             print(f"warning: frame {i} ({sized.width}x{sized.height}) does not fit; shrinking it", file=sys.stderr)
-            f = min(fs / sized.width, base_y / sized.height)
+            f = min(fs / sized.width, limit_h / sized.height)
             sized = sized.resize((max(1, int(sized.width * f)), max(1, int(sized.height * f))), Image.LANCZOS)
         frame = Image.new("RGBA", (fs, fs), (0, 0, 0, 0))
-        frame.alpha_composite(sized, ((fs - sized.width) // 2, base_y - sized.height))
+        y = (fs - sized.height) // 2 if args.anchor == "center" else base_y - sized.height
+        frame.alpha_composite(sized, ((fs - sized.width) // 2, y))
         frames.append(frame)
 
     name = args.anim

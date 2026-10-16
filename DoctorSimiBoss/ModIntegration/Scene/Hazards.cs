@@ -59,20 +59,27 @@ namespace DoctorSimiBoss.Scene
         private float _life;
         private float _minX, _maxX, _floorY;
         private bool _stopAtFloor;
+        private System.Action<Vector3> _onFloor;
 
-        public static Hazard Spawn(Transform parent, string name, Sprite sprite, Vector3 position, Vector2 scale,
-                                   Vector2 colliderSize, Vector2 colliderOffset, Vector2 velocity, float life,
-                                   int layer, int damage, float minX, float maxX, float floorY, bool stopAtFloor)
+        /// <param name="frames">Animated sprites (looped at <paramref name="fps"/>); a single frame is a still sprite.</param>
+        /// <param name="colliderSize">Collider in the object's local units (before scale and rotation).</param>
+        public static Hazard Spawn(Transform parent, string name, Sprite[] frames, float fps, bool flipX, float rotation,
+                                   Vector3 position, Vector2 scale, Vector2 colliderSize, Vector2 colliderOffset,
+                                   Vector2 velocity, float life, int layer, int damage,
+                                   float minX, float maxX, float floorY, bool stopAtFloor, System.Action<Vector3> onFloor = null)
         {
             var go = new GameObject(name);
             go.layer = layer;
             go.transform.SetParent(parent, true);
             go.transform.position = position;
+            go.transform.rotation = Quaternion.Euler(0f, 0f, rotation);
             go.transform.localScale = new Vector3(scale.x, scale.y, 1f);
 
             var renderer = go.AddComponent<SpriteRenderer>();
-            renderer.sprite = sprite;
+            renderer.sprite = frames[0];
+            renderer.flipX = flipX;
             renderer.sortingOrder = 5;
+            if (frames.Length > 1) go.AddComponent<FramePlayer>().Play(frames, fps, true);
 
             var rb = go.AddComponent<Rigidbody2D>();
             rb.isKinematic = true;
@@ -91,6 +98,7 @@ namespace DoctorSimiBoss.Scene
             hazard._maxX = maxX;
             hazard._floorY = floorY;
             hazard._stopAtFloor = stopAtFloor;
+            hazard._onFloor = onFloor;
             return hazard;
         }
 
@@ -100,7 +108,9 @@ namespace DoctorSimiBoss.Scene
             _life -= dt;
             var p = transform.position + (Vector3)(_velocity * dt);
             transform.position = p;
-            if (_life <= 0 || p.x < _minX || p.x > _maxX || (_stopAtFloor && p.y <= _floorY)) Destroy(gameObject);
+            bool landed = _stopAtFloor && p.y <= _floorY;
+            if (landed && _onFloor != null) _onFloor(new Vector3(p.x, _floorY, p.z));
+            if (_life <= 0 || p.x < _minX || p.x > _maxX || landed) Destroy(gameObject);
         }
     }
 

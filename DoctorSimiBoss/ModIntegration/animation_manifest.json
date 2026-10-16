@@ -1,34 +1,34 @@
 {
   "name": "DoctorSimiBoss",
   "schemaVersion": 1,
-  "status": "visual-prototype",
+  "status": "hd-art",
   "frameSize": {
-    "width": 128,
-    "height": 128
+    "width": 320,
+    "height": 320
   },
   "origin": {
     "x": 0.5,
     "y": 0.97,
-    "note": "Normalized pivot from the top-left of each 128x128 frame: feet rest on row ~124 in Idle/Attack/Walk. Measured from the PNGs; calibrate in-game."
+    "note": "Feet on row 310 of each 320x320 frame (Tools/import_sheet.py --frame-size 320 --baseline 0.97)."
   },
   "spriteFacing": "left",
   "spriteScale": {
-    "pixelsPerUnit": 32,
-    "note": "Boss is ~116 px tall in each frame, so about 3.6 world units at 32 px/unit."
+    "pixelsPerUnit": 64,
+    "note": "Character is ~224 px tall in every frame (one shared import scale), about 3.5 world units."
   },
   "hitboxes": {
-    "note": "Rectangles in frame pixels (origin top-left, sprite facing left), measured from the PNGs.",
+    "note": "Rectangles in frame pixels (origin top-left, sprite facing left), measured on SpritesHD Idle and Attack frame 03.",
     "body": {
-      "x": 30,
-      "y": 10,
-      "width": 70,
-      "height": 114
+      "x": 100,
+      "y": 95,
+      "width": 120,
+      "height": 215
     },
     "punch": {
-      "x": 4,
-      "y": 50,
-      "width": 32,
-      "height": 28
+      "x": 40,
+      "y": 165,
+      "width": 60,
+      "height": 50
     }
   },
   "animations": {
@@ -36,36 +36,36 @@
       "loop": false,
       "fps": 10,
       "frames": [
-        "Assets/Sprites/Spawn/spawn_00.png",
-        "Assets/Sprites/Spawn/spawn_01.png",
-        "Assets/Sprites/Spawn/spawn_02.png",
-        "Assets/Sprites/Spawn/spawn_03.png",
-        "Assets/Sprites/Spawn/spawn_04.png",
-        "Assets/Sprites/Spawn/spawn_05.png"
+        "Assets/SpritesHD/Spawn/spawn_00.png",
+        "Assets/SpritesHD/Spawn/spawn_01.png",
+        "Assets/SpritesHD/Spawn/spawn_02.png",
+        "Assets/SpritesHD/Spawn/spawn_03.png",
+        "Assets/SpritesHD/Spawn/spawn_04.png",
+        "Assets/SpritesHD/Spawn/spawn_05.png"
       ]
     },
     "Idle": {
       "loop": true,
       "fps": 6,
       "frames": [
-        "Assets/Sprites/Idle/idle_00.png",
-        "Assets/Sprites/Idle/idle_01.png",
-        "Assets/Sprites/Idle/idle_02.png",
-        "Assets/Sprites/Idle/idle_03.png",
-        "Assets/Sprites/Idle/idle_04.png",
-        "Assets/Sprites/Idle/idle_05.png"
+        "Assets/SpritesHD/Idle/idle_00.png",
+        "Assets/SpritesHD/Idle/idle_01.png",
+        "Assets/SpritesHD/Idle/idle_02.png",
+        "Assets/SpritesHD/Idle/idle_03.png",
+        "Assets/SpritesHD/Idle/idle_04.png",
+        "Assets/SpritesHD/Idle/idle_05.png"
       ]
     },
     "Walk": {
       "loop": true,
       "fps": 9,
       "frames": [
-        "Assets/Sprites/Walk/walk_00.png",
-        "Assets/Sprites/Walk/walk_01.png",
-        "Assets/Sprites/Walk/walk_02.png",
-        "Assets/Sprites/Walk/walk_03.png",
-        "Assets/Sprites/Walk/walk_04.png",
-        "Assets/Sprites/Walk/walk_05.png"
+        "Assets/SpritesHD/Walk/walk_00.png",
+        "Assets/SpritesHD/Walk/walk_01.png",
+        "Assets/SpritesHD/Walk/walk_02.png",
+        "Assets/SpritesHD/Walk/walk_03.png",
+        "Assets/SpritesHD/Walk/walk_04.png",
+        "Assets/SpritesHD/Walk/walk_05.png"
       ]
     },
     "Attack": {
@@ -73,70 +73,195 @@
       "fps": 12,
       "suggestedDamageFrame": 3,
       "frames": [
-        "Assets/Sprites/Attack/attack_00.png",
-        "Assets/Sprites/Attack/attack_01.png",
-        "Assets/Sprites/Attack/attack_02.png",
-        "Assets/Sprites/Attack/attack_03.png",
-        "Assets/Sprites/Attack/attack_04.png",
-        "Assets/Sprites/Attack/attack_05.png"
+        "Assets/SpritesHD/Attack/attack_00.png",
+        "Assets/SpritesHD/Attack/attack_01.png",
+        "Assets/SpritesHD/Attack/attack_02.png",
+        "Assets/SpritesHD/Attack/attack_03.png",
+        "Assets/SpritesHD/Attack/attack_04.png",
+        "Assets/SpritesHD/Attack/attack_05.png"
       ]
     },
     "Hurt": {
       "loop": false,
       "fps": 10,
       "frames": [
-        "Assets/Sprites/Hurt/hurt_00.png",
-        "Assets/Sprites/Hurt/hurt_01.png",
-        "Assets/Sprites/Hurt/hurt_02.png",
-        "Assets/Sprites/Hurt/hurt_03.png",
-        "Assets/Sprites/Hurt/hurt_04.png",
-        "Assets/Sprites/Hurt/hurt_05.png"
+        "Assets/SpritesHD/Hurt/hurt_00.png",
+        "Assets/SpritesHD/Hurt/hurt_01.png",
+        "Assets/SpritesHD/Hurt/hurt_02.png",
+        "Assets/SpritesHD/Hurt/hurt_03.png",
+        "Assets/SpritesHD/Hurt/hurt_04.png",
+        "Assets/SpritesHD/Hurt/hurt_05.png"
       ]
     },
     "Stun": {
       "loop": true,
       "fps": 6,
       "frames": [
-        "Assets/Sprites/Stun/stun_00.png",
-        "Assets/Sprites/Stun/stun_01.png",
-        "Assets/Sprites/Stun/stun_02.png",
-        "Assets/Sprites/Stun/stun_03.png",
-        "Assets/Sprites/Stun/stun_04.png",
-        "Assets/Sprites/Stun/stun_05.png"
+        "Assets/SpritesHD/Stun/stun_00.png",
+        "Assets/SpritesHD/Stun/stun_01.png",
+        "Assets/SpritesHD/Stun/stun_02.png",
+        "Assets/SpritesHD/Stun/stun_03.png",
+        "Assets/SpritesHD/Stun/stun_04.png",
+        "Assets/SpritesHD/Stun/stun_05.png"
       ]
     },
     "Defeat": {
       "loop": false,
       "fps": 8,
       "frames": [
-        "Assets/Sprites/Defeat/defeat_00.png",
-        "Assets/Sprites/Defeat/defeat_01.png",
-        "Assets/Sprites/Defeat/defeat_02.png",
-        "Assets/Sprites/Defeat/defeat_03.png",
-        "Assets/Sprites/Defeat/defeat_04.png",
-        "Assets/Sprites/Defeat/defeat_05.png"
+        "Assets/SpritesHD/Defeat/defeat_00.png",
+        "Assets/SpritesHD/Defeat/defeat_01.png",
+        "Assets/SpritesHD/Defeat/defeat_02.png",
+        "Assets/SpritesHD/Defeat/defeat_03.png",
+        "Assets/SpritesHD/Defeat/defeat_04.png",
+        "Assets/SpritesHD/Defeat/defeat_05.png"
+      ]
+    },
+    "SpecialPunch": {
+      "loop": false,
+      "fps": 10,
+      "suggestedDamageFrame": 3,
+      "frames": [
+        "Assets/SpritesHD/SpecialPunch/specialpunch_00.png",
+        "Assets/SpritesHD/SpecialPunch/specialpunch_01.png",
+        "Assets/SpritesHD/SpecialPunch/specialpunch_02.png",
+        "Assets/SpritesHD/SpecialPunch/specialpunch_03.png",
+        "Assets/SpritesHD/SpecialPunch/specialpunch_04.png",
+        "Assets/SpritesHD/SpecialPunch/specialpunch_05.png"
+      ]
+    },
+    "SpecialSlam": {
+      "loop": false,
+      "fps": 10,
+      "frames": [
+        "Assets/SpritesHD/SpecialSlam/specialslam_00.png",
+        "Assets/SpritesHD/SpecialSlam/specialslam_01.png",
+        "Assets/SpritesHD/SpecialSlam/specialslam_02.png",
+        "Assets/SpritesHD/SpecialSlam/specialslam_03.png",
+        "Assets/SpritesHD/SpecialSlam/specialslam_04.png",
+        "Assets/SpritesHD/SpecialSlam/specialslam_05.png"
+      ]
+    },
+    "SpecialDash": {
+      "loop": false,
+      "fps": 10,
+      "frames": [
+        "Assets/SpritesHD/SpecialDash/specialdash_00.png",
+        "Assets/SpritesHD/SpecialDash/specialdash_01.png",
+        "Assets/SpritesHD/SpecialDash/specialdash_02.png",
+        "Assets/SpritesHD/SpecialDash/specialdash_03.png",
+        "Assets/SpritesHD/SpecialDash/specialdash_04.png",
+        "Assets/SpritesHD/SpecialDash/specialdash_05.png"
+      ]
+    },
+    "SpecialSpin": {
+      "loop": false,
+      "fps": 12,
+      "frames": [
+        "Assets/SpritesHD/SpecialSpin/specialspin_00.png",
+        "Assets/SpritesHD/SpecialSpin/specialspin_01.png",
+        "Assets/SpritesHD/SpecialSpin/specialspin_02.png",
+        "Assets/SpritesHD/SpecialSpin/specialspin_03.png",
+        "Assets/SpritesHD/SpecialSpin/specialspin_04.png",
+        "Assets/SpritesHD/SpecialSpin/specialspin_05.png"
+      ]
+    },
+    "SpecialCapsules": {
+      "loop": false,
+      "fps": 8,
+      "frames": [
+        "Assets/SpritesHD/SpecialCapsules/specialcapsules_00.png",
+        "Assets/SpritesHD/SpecialCapsules/specialcapsules_01.png",
+        "Assets/SpritesHD/SpecialCapsules/specialcapsules_02.png",
+        "Assets/SpritesHD/SpecialCapsules/specialcapsules_03.png",
+        "Assets/SpritesHD/SpecialCapsules/specialcapsules_04.png",
+        "Assets/SpritesHD/SpecialCapsules/specialcapsules_05.png"
+      ]
+    },
+    "SpecialWave": {
+      "loop": false,
+      "fps": 8,
+      "frames": [
+        "Assets/SpritesHD/SpecialWave/specialwave_00.png",
+        "Assets/SpritesHD/SpecialWave/specialwave_01.png",
+        "Assets/SpritesHD/SpecialWave/specialwave_02.png",
+        "Assets/SpritesHD/SpecialWave/specialwave_03.png",
+        "Assets/SpritesHD/SpecialWave/specialwave_04.png",
+        "Assets/SpritesHD/SpecialWave/specialwave_05.png"
       ]
     }
   },
   "effects": {
     "PunchImpact": {
       "loop": false,
-      "fps": 12,
-      "suggestedSync": "Attack frame 03; confirm against hitbox timing in-game.",
+      "fps": 14,
+      "frameSize": {
+        "width": 256,
+        "height": 256
+      },
       "frames": [
-        "Assets/Effects/PunchImpact/impact_00.png",
-        "Assets/Effects/PunchImpact/impact_01.png",
-        "Assets/Effects/PunchImpact/impact_02.png",
-        "Assets/Effects/PunchImpact/impact_03.png",
-        "Assets/Effects/PunchImpact/impact_04.png",
-        "Assets/Effects/PunchImpact/impact_05.png"
+        "Assets/SpritesHD/PunchImpact/punchimpact_00.png",
+        "Assets/SpritesHD/PunchImpact/punchimpact_01.png",
+        "Assets/SpritesHD/PunchImpact/punchimpact_02.png",
+        "Assets/SpritesHD/PunchImpact/punchimpact_03.png",
+        "Assets/SpritesHD/PunchImpact/punchimpact_04.png",
+        "Assets/SpritesHD/PunchImpact/punchimpact_05.png"
+      ],
+      "suggestedSync": "Attack and SpecialPunch frame 03."
+    },
+    "Shockwave": {
+      "loop": true,
+      "fps": 12,
+      "frameSize": {
+        "width": 256,
+        "height": 256
+      },
+      "origin": {
+        "x": 0.5,
+        "y": 0.97
+      },
+      "frames": [
+        "Assets/SpritesHD/Shockwave/shockwave_00.png",
+        "Assets/SpritesHD/Shockwave/shockwave_01.png",
+        "Assets/SpritesHD/Shockwave/shockwave_02.png",
+        "Assets/SpritesHD/Shockwave/shockwave_03.png",
+        "Assets/SpritesHD/Shockwave/shockwave_04.png",
+        "Assets/SpritesHD/Shockwave/shockwave_05.png"
+      ]
+    },
+    "Capsule": {
+      "loop": true,
+      "fps": 6,
+      "frameSize": {
+        "width": 256,
+        "height": 256
+      },
+      "frames": [
+        "Assets/SpritesHD/Capsule/capsule_00.png",
+        "Assets/SpritesHD/Capsule/capsule_01.png"
+      ]
+    },
+    "CapsuleBurst": {
+      "loop": false,
+      "fps": 14,
+      "frameSize": {
+        "width": 256,
+        "height": 256
+      },
+      "frames": [
+        "Assets/SpritesHD/CapsuleBurst/capsuleburst_00.png",
+        "Assets/SpritesHD/CapsuleBurst/capsuleburst_01.png",
+        "Assets/SpritesHD/CapsuleBurst/capsuleburst_02.png",
+        "Assets/SpritesHD/CapsuleBurst/capsuleburst_03.png",
+        "Assets/SpritesHD/CapsuleBurst/capsuleburst_04.png",
+        "Assets/SpritesHD/CapsuleBurst/capsuleburst_05.png"
       ]
     }
   },
   "integrationNotes": [
-    "Frame timing, scale, pivot, hitboxes, and damage frame are provisional.",
-    "Read by DoctorSimiBoss.Core (AnimationManifestParser + ManifestValidator). The boss logic runs on it, but no scene insertion exists yet.",
-    "Specials without game-ready sprites (assetStatus concept-only/design-only) are animated with the Attack placeholder; non-attack states fall back to Idle.",
+    "Frame timing, scale, pivot, hitboxes, and damage frame are provisional; tune in game.",
+    "Art: AI-generated sheets in Art/AI_Sheets, imported with Tools/import_sheet.py into SpritesHD (320x320 characters, 256x256 effects).",
+    "The original 128 px sprites in Sprites/ and Effects/ are kept unchanged in the repository but are no longer shipped.",
     "Files under References/ are concept art only and must never be listed as frames."
   ],
   "encounterPhases": [
@@ -184,7 +309,7 @@
       "displayName": "Saludo cargado",
       "phase": 1,
       "animation": "SpecialPunch",
-      "assetStatus": "concept-only",
+      "assetStatus": "ready",
       "frameCount": 6,
       "conceptPoses": [
         1,
@@ -196,14 +321,15 @@
         "active": 0.35,
         "recovery": 0.8
       },
-      "placeholderAnimation": "Attack"
+      "placeholderAnimation": "Attack",
+      "sourceSheet": "Art/AI_Sheets/DoctorSimi_SpecialPunch.png"
     },
     {
       "id": "PisotonSimi",
       "displayName": "Pisotón Simi",
       "phase": 1,
       "animation": "SpecialSlam",
-      "assetStatus": "concept-only",
+      "assetStatus": "ready",
       "frameCount": 6,
       "conceptPoses": [
         3
@@ -214,14 +340,15 @@
         "active": 0.5,
         "recovery": 0.6
       },
-      "placeholderAnimation": "Spawn"
+      "placeholderAnimation": "Spawn",
+      "sourceSheet": "Art/AI_Sheets/DoctorSimi_SpecialSlam.png"
     },
     {
       "id": "CarreraPasillo",
       "displayName": "Carrera de pasillo",
       "phase": 2,
       "animation": "SpecialDash",
-      "assetStatus": "concept-only",
+      "assetStatus": "ready",
       "frameCount": 6,
       "conceptPoses": [
         4
@@ -233,14 +360,15 @@
         "recovery": 0.3,
         "selfStunAfter": 1.0
       },
-      "placeholderAnimation": "Walk"
+      "placeholderAnimation": "Walk",
+      "sourceSheet": "Art/AI_Sheets/DoctorSimi_SpecialDash.png"
     },
     {
       "id": "GiroBotarga",
       "displayName": "Giro de botarga",
       "phase": 2,
       "animation": "SpecialSpin",
-      "assetStatus": "concept-only",
+      "assetStatus": "ready",
       "frameCount": 6,
       "conceptPoses": [
         5
@@ -251,14 +379,15 @@
         "active": 0.7,
         "recovery": 0.6
       },
-      "placeholderAnimation": "Spawn"
+      "placeholderAnimation": "Spawn",
+      "sourceSheet": "Art/AI_Sheets/DoctorSimi_SpecialSpin.png"
     },
     {
       "id": "LluviaCapsulas",
       "displayName": "Lluvia de cápsulas",
       "phase": 3,
       "animation": "SpecialCapsules",
-      "assetStatus": "design-only",
+      "assetStatus": "ready",
       "frameCount": 6,
       "conceptPoses": [],
       "conceptSheet": null,
@@ -267,14 +396,15 @@
         "active": 1.6,
         "recovery": 0.8
       },
-      "placeholderAnimation": "Attack"
+      "placeholderAnimation": "Attack",
+      "sourceSheet": "Art/AI_Sheets/DoctorSimi_SpecialCapsules.png"
     },
     {
       "id": "AplausoSalida",
       "displayName": "Aplauso de salida",
       "phase": 3,
       "animation": "SpecialWave",
-      "assetStatus": "concept-only",
+      "assetStatus": "ready",
       "frameCount": 6,
       "conceptPoses": [
         6
@@ -285,7 +415,8 @@
         "active": 1.8,
         "recovery": 1.5
       },
-      "placeholderAnimation": "Attack"
+      "placeholderAnimation": "Attack",
+      "sourceSheet": "Art/AI_Sheets/DoctorSimi_SpecialWave.png"
     }
   ],
   "tuning": {
@@ -378,5 +509,18 @@
     "access": "debugKey",
     "debugKey": "F8",
     "entranceAnimation": "Spawn"
+  },
+  "colorGrade": {
+    "note": "Applied in game to boss and effect sprites (not the arena) so the bright AI art matches the dim, cool Hollow Knight palette. Set enabled to false to see the art as drawn.",
+    "enabled": true,
+    "saturation": 0.62,
+    "brightness": 0.82,
+    "contrast": 1.08,
+    "tint": [
+      150,
+      170,
+      200
+    ],
+    "tintAmount": 0.12
   }
 }

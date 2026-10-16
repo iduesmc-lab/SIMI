@@ -86,21 +86,22 @@ namespace DoctorSimiBoss.Core.Tests
         }
 
         [Fact]
-        public void SpecialsUseTheirOwnPlaceholderClips()
+        public void WithoutSpecialSpritesSpecialsUseTheirOwnPlaceholderClips()
         {
-            var r = _def.CreateAnimationResolver(PlaceholderPolicy.PreferAvailable);
-            var pisoton = _def.Attacks.Get("PisotonSimi");
+            var (m, report, attacks) = TestSupport.WithoutSpecialSprites();
+            var r = new BossAnimationResolver(m, report, PlaceholderPolicy.PreferAvailable);
+            var pisoton = attacks.Get("PisotonSimi");
             var slam = r.Resolve(BossState.Attack, pisoton);
             Assert.Equal("Spawn", slam.Clip);
             Assert.Equal(6f / (pisoton.Windup + pisoton.Active), slam.Fps, 3);
 
-            var dash = r.Resolve(BossState.Attack, _def.Attacks.Get("CarreraPasillo"));
+            var dash = r.Resolve(BossState.Attack, attacks.Get("CarreraPasillo"));
             Assert.Equal("Walk", dash.Clip);
-            Assert.True(dash.Fps > _def.Manifest.Animations["Walk"].Fps);
+            Assert.True(dash.Fps > m.Animations["Walk"].Fps);
 
-            Assert.Equal("Attack", r.Resolve(BossState.Attack, _def.Attacks.Get("SaludoCargado")).Clip);
-            Assert.Equal("Spawn", r.Resolve(BossState.Attack, _def.Attacks.Leap).Clip);
-            Assert.Equal("Attack", _def.CreateAnimationResolver(PlaceholderPolicy.IdleAndAttackOnly).Resolve(BossState.Attack, pisoton).Clip);
+            Assert.Equal("Attack", r.Resolve(BossState.Attack, attacks.Get("SaludoCargado")).Clip);
+            Assert.Equal("Spawn", r.Resolve(BossState.Attack, attacks.Leap).Clip);
+            Assert.Equal("Attack", new BossAnimationResolver(m, report, PlaceholderPolicy.IdleAndAttackOnly).Resolve(BossState.Attack, pisoton).Clip);
         }
     }
 }

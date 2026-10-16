@@ -275,13 +275,43 @@ namespace DoctorSimiBoss.Scene
         private void SpawnWaves(float speed, float width, float height, float life = 6f)
         {
             float x = transform.position.x;
+            var art = _sprites.Get("Shockwave");
             foreach (int dir in new[] { -1, 1 })
             {
-                Hazard.Spawn(transform.parent, "Wave", ProceduralSprites.Wave, new Vector3(x + dir * 0.6f, Floor, 0f),
-                             new Vector2(width, height * 2f), new Vector2(0.8f, 0.4f), new Vector2(0f, 0.2f),
-                             new Vector2(dir * speed, 0f), life, _layers.EnemyDamage, _definition.Tuning.AttackDamage,
-                             LeftWall, RightWall, float.MinValue, false);
+                var position = new Vector3(x + dir * 0.6f, Floor, 0f);
+                var velocity = new Vector2(dir * speed, 0f);
+                if (art != null && art.Length >= 5)
+                {
+                    // HD wave (about 3.1 x 1.05 units, pivot on the ground): loop its three biggest frames.
+                    var loop = new[] { art[2], art[3], art[4] };
+                    var scale = new Vector2(width * 1.8f / 3.1f, height / 1.05f);
+                    Hazard.Spawn(transform.parent, "Wave", loop, 12f, dir < 0, 0f, position, scale,
+                                 new Vector2(1.4f, 0.7f), new Vector2(0f, 0.35f), velocity, life,
+                                 _layers.EnemyDamage, _definition.Tuning.AttackDamage, LeftWall, RightWall, float.MinValue, false);
+                }
+                else
+                {
+                    Hazard.Spawn(transform.parent, "Wave", new[] { ProceduralSprites.Wave }, 0f, false, 0f, position,
+                                 new Vector2(width, height * 2f), new Vector2(0.8f, 0.4f), new Vector2(0f, 0.2f), velocity, life,
+                                 _layers.EnemyDamage, _definition.Tuning.AttackDamage, LeftWall, RightWall, float.MinValue, false);
+                }
             }
+        }
+
+        /// <summary>One-shot effect (impact, burst) from the manifest's effects.</summary>
+        private void SpawnEffect(string effectName, Vector3 position, bool flipX)
+        {
+            var frames = _sprites.Get(effectName);
+            if (frames == null || !_definition.Manifest.Effects.TryGetValue(effectName, out var clip)) return;
+            var go = new GameObject(effectName);
+            go.transform.SetParent(transform.parent, true);
+            go.transform.position = position;
+            var renderer = go.AddComponent<SpriteRenderer>();
+            renderer.flipX = flipX;
+            renderer.sortingOrder = 6;
+            var player = go.AddComponent<FramePlayer>();
+            player.DestroyWhenDone = true;
+            player.Play(frames, clip.Fps, false);
         }
 
         /// <summary>
@@ -298,10 +328,28 @@ namespace DoctorSimiBoss.Scene
                 float cx = LeftWall + laneWidth * (lane + 0.5f);
                 Telegraph.Show(transform.parent, new Vector3(cx, Floor, 0.05f), new Vector2(laneWidth * 0.9f / (8f / 64f), (Top - Floor) / 1f), startDelay + warnFor);
                 float x = cx;
-                At(startDelay + warnFor, () =>
-                    Hazard.Spawn(transform.parent, "Capsule", ProceduralSprites.Capsule, new Vector3(x, Top - 0.5f, 0f),
-                                 Vector2.one, new Vector2(0.5f, 1.2f), Vector2.zero, new Vector2(0f, -17f), 4f,
-                                 _layers.EnemyDamage, _definition.Tuning.AttackDamage, LeftWall - 1f, RightWall + 1f, Floor, true));
+                At(startDelay + warnFor, () => DropCapsule(x));
+            }
+        }
+
+        private void DropCapsule(float x)
+        {
+            var art = _sprites.Get("Capsule");
+            var start = new Vector3(x, Top - 0.5f, 0f);
+            var velocity = new Vector2(0f, -17f);
+            int damage = _definition.Tuning.AttackDamage;
+            if (art != null)
+            {
+                // HD capsule is drawn lying down (about 1.4 x 0.8 units): rotate it to fall upright.
+                Hazard.Spawn(transform.parent, "Capsule", art, 6f, false, -90f, start, Vector2.one,
+                             new Vector2(1.2f, 0.6f), Vector2.zero, velocity, 4f, _layers.EnemyDamage, damage,
+                             LeftWall - 1f, RightWall + 1f, Floor, true, p => SpawnEffect("CapsuleBurst", p + new Vector3(0f, 0.4f, 0f), false));
+            }
+            else
+            {
+                Hazard.Spawn(transform.parent, "Capsule", new[] { ProceduralSprites.Capsule }, 0f, false, 0f, start, Vector2.one,
+                             new Vector2(0.5f, 1.2f), Vector2.zero, velocity, 4f, _layers.EnemyDamage, damage,
+                             LeftWall - 1f, RightWall + 1f, Floor, true);
             }
         }
 
@@ -368,19 +416,8 @@ namespace DoctorSimiBoss.Scene
 
         public void PlayEffect(string effectName)
         {
-            var frames = _sprites.Get(effectName);
-            var clip = _definition.Manifest.Effects.TryGetValue(effectName, out var info) ? info : null;
-            if (frames == null || clip == null) return;
-
             var box = FrameGeometry.ToLocal(_definition.Manifest, _definition.Manifest.PunchBox, _facing);
-            var go = new GameObject(effectName);
-            go.transform.SetParent(transform.parent, false);
-            go.transform.position = transform.position + new Vector3(box.CenterX, box.CenterY, -0.02f);
-            var renderer = go.AddComponent<SpriteRenderer>();
-            renderer.flipX = _renderer.flipX;
-            var player = go.AddComponent<FramePlayer>();
-            player.DestroyWhenDone = true;
-            player.Play(frames, clip.Fps, false);
+            SpawnEffect(effectName, transform.position + new Vector3(box.CenterX, box.CenterY, -0.02f), _renderer.flipX);
         }
 
         public void OnDefeated()

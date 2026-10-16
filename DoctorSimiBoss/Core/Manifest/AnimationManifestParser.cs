@@ -158,6 +158,27 @@ namespace DoctorSimiBoss.Core.Manifest
                 };
             }
 
+            var grade = GetObject(root, "colorGrade");
+            if (grade != null)
+            {
+                var g = new DoctorSimiBoss.Core.Animation.ColorGrade
+                {
+                    Enabled = GetBool(grade, "enabled", true),
+                    Saturation = (float)GetNumber(grade, "saturation", 1),
+                    Brightness = (float)GetNumber(grade, "brightness", 1),
+                    Contrast = (float)GetNumber(grade, "contrast", 1),
+                    TintAmount = (float)GetNumber(grade, "tintAmount", 0),
+                };
+                var tint = GetArray(grade, "tint").ToList();
+                if (tint.Count == 3)
+                {
+                    g.TintR = (byte)Math.Max(0, Math.Min(255, ToDouble(tint[0], "tint[]")));
+                    g.TintG = (byte)Math.Max(0, Math.Min(255, ToDouble(tint[1], "tint[]")));
+                    g.TintB = (byte)Math.Max(0, Math.Min(255, ToDouble(tint[2], "tint[]")));
+                }
+                manifest.ColorGrade = g;
+            }
+
             var encounter = GetObject(root, "encounter");
             if (encounter != null)
             {
@@ -186,6 +207,18 @@ namespace DoctorSimiBoss.Core.Manifest
                 };
                 if (c.ContainsKey("suggestedDamageFrame"))
                     clip.SuggestedDamageFrame = (int)GetNumber(c, "suggestedDamageFrame", 0);
+                var size = GetObject(c, "frameSize");
+                if (size != null)
+                {
+                    clip.FrameWidth = (int)GetNumber(size, "width", 0);
+                    clip.FrameHeight = (int)GetNumber(size, "height", 0);
+                }
+                var origin = GetObject(c, "origin");
+                if (origin != null)
+                {
+                    clip.OriginX = GetOptionalFloat(origin, "x");
+                    clip.OriginY = GetOptionalFloat(origin, "y");
+                }
                 foreach (var f in GetArray(c, "frames"))
                 {
                     var path = f as string;

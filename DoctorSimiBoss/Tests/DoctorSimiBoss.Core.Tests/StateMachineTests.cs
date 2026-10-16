@@ -351,16 +351,36 @@ namespace DoctorSimiBoss.Core.Tests
         private readonly BossDefinition _def = TestSupport.LoadRealDefinition();
 
         [Fact]
-        public void SpecialsUseTheAttackClipStretchedToTheirWindup()
+        public void SpecialsUseTheirDedicatedClips()
         {
             var resolver = _def.CreateAnimationResolver(PlaceholderPolicy.PreferAvailable);
             var saludo = _def.Attacks.Get("SaludoCargado");
+            var punch = resolver.Resolve(BossState.Attack, saludo);
+            Assert.Equal("SpecialPunch", punch.Clip);
+            Assert.False(punch.IsPlaceholder);
+            Assert.Equal(3f / saludo.Windup, punch.Fps, 3); // damage frame 03 lands when the active part starts
+
+            var slamAttack = _def.Attacks.Get("PisotonSimi");
+            var slam = resolver.Resolve(BossState.Attack, slamAttack);
+            Assert.Equal("SpecialSlam", slam.Clip);
+            Assert.Equal(6f / (slamAttack.Windup + slamAttack.Active), slam.Fps, 3);
+
+            Assert.Equal("SpecialDash", resolver.Resolve(BossState.Attack, _def.Attacks.Get("CarreraPasillo")).Clip);
+            Assert.Equal("Attack", _def.CreateAnimationResolver(PlaceholderPolicy.IdleAndAttackOnly).Resolve(BossState.Attack, saludo).Clip);
+        }
+
+        [Fact]
+        public void WithoutSpecialSpritesSpecialsUseTheAttackClipStretchedToTheirWindup()
+        {
+            var (m, report, attacks) = TestSupport.WithoutSpecialSprites();
+            var resolver = new BossAnimationResolver(m, report, PlaceholderPolicy.PreferAvailable);
+            var saludo = attacks.Get("SaludoCargado");
             var request = resolver.Resolve(BossState.Attack, saludo);
             Assert.Equal("Attack", request.Clip);
             Assert.True(request.IsPlaceholder);
             Assert.Equal(3f / saludo.Windup, request.Fps, 3);
 
-            var basic = resolver.Resolve(BossState.Attack, _def.Attacks.Basic);
+            var basic = resolver.Resolve(BossState.Attack, attacks.Basic);
             Assert.Equal("Attack", basic.Clip);
             Assert.False(basic.IsPlaceholder);
             Assert.Equal(12f, basic.Fps, 3);
