@@ -6,7 +6,7 @@
 |---|---|
 | Lógica del jefe (`../Core`) | Implementada y con pruebas unitarias (60) en .NET 8. Compila para `net472` y `netstandard2.0` sin dependencias del juego. |
 | Lectura y validación del manifiesto | Implementada. Comprueba que existan los 48 cuadros, que sean PNG de 128 × 128, que las fases sean coherentes y que no se use arte conceptual como sprite. |
-| Entrada del mod (`DoctorSimiBossMod.cs`) | Carga y valida el manifiesto y lo escribe en el log. **No se ha compilado contra tus DLL reales** (`Modding.dll`, `Assembly-CSharp.dll`). Solo se comprobó su sintaxis y el empaquetado con stubs falsos. |
+| Entrada del mod (`DoctorSimiBossMod.cs`) | Carga y valida el manifiesto y lo escribe en el log. **No se ha compilado contra tu `Assembly-CSharp.dll` real** (con la Modding API aplicada). Solo se comprobó su sintaxis y el empaquetado con stubs falsos. |
 | Arena | Tu imagen está en `../Arena/` con suelo, paredes y puntos de entrada medidos (provisionales). Se valida y se empaqueta. |
 | Inserción en una escena | **No implementada.** Faltan la versión del juego y la ruta de `Managed` (ver abajo). |
 | Jugable en Hollow Knight | **No.** Todavía no hay objeto del jefe en el juego, ni sprites cargados en Unity, ni colisiones. |
@@ -76,19 +76,33 @@ Pruebas de la lógica (no necesitan el juego; requieren .NET SDK 8):
 dotnet test DoctorSimiBoss/Tests/DoctorSimiBoss.Core.Tests
 ```
 
-Mod (requiere tus DLL):
+Mod (requiere la Modding API instalada en tu juego):
 
-1. Instala Modding API para tu versión de Hollow Knight.
-2. Copia la carpeta `Managed` del juego a `ModIntegration/HollowKnightManaged/`, o pasa `-p:HollowKnightRefs=<ruta a Managed>`.
-   Esa carpeta está en `.gitignore`: las DLL del juego no se suben al repositorio.
-3. `dotnet build DoctorSimiBoss/ModIntegration/DoctorSimiBoss.csproj -c Release`
+1. Pon Hollow Knight en **1.5.78.11833** y activa la API con Scarab (ver *Versión del juego* más abajo).
+2. Compila apuntando a tu carpeta `Managed` (en Windows, desde PowerShell, con el .NET SDK instalado):
+   ```
+   dotnet build DoctorSimiBoss\ModIntegration\DoctorSimiBoss.csproj -c Release -p:HollowKnightRefs="D:\SteamLibrary\steamapps\common\Hollow Knight\hollow_knight_Data\Managed"
+   ```
+   También puedes copiar `Managed` a `ModIntegration/HollowKnightManaged/` (está en `.gitignore`: las DLL del juego no se suben al repositorio).
+3. No existe un `Modding.dll` separado: en la API para 1.5 los tipos `Modding` van dentro del `Assembly-CSharp.dll` parcheado. Si ves *"The type or namespace name 'Modding' could not be found"*, ese `Assembly-CSharp.dll` es el original sin API.
 4. El resultado queda en `ModIntegration/bin/Release/`: `DoctorSimiBoss.dll` y `Assets/` (manifiesto, `Sprites/`, `Effects/`).
    Las DLL del juego no se copian a la salida y `References/` nunca se empaqueta.
 5. Copia esos archivos a la carpeta de mods de tu instalación. Si el cargador lo reconoce, el log debería mostrar una línea por clip y por especial, y `Boss definition ready`.
 
 Si faltan las DLL, la compilación se detiene con un mensaje que indica la ruta buscada.
 
-> La referencia previa a *ModdingAPI v77 para Hollow Knight 1.5.78.11833* y al ejemplo *Simple Hooks* viene del paquete original y **no se ha verificado** contra tu instalación.
+## Versión del juego
+
+Tu juego está en **1.5.12620**. Las versiones de la Modding API publicadas en [hk-modding/api](https://github.com/hk-modding/api/releases) (hasta la v77) son para **1.5.78.11833**. Los avisos de Scarab y Lumafly sobre el parche 1.5.12459 indican que la API no funciona en los parches 1.5.12xxx, y no he encontrado ninguna versión para 1.5.12620. Por eso Scarab no ha puesto la API en tu carpeta.
+
+Pasos:
+
+1. Steam → clic derecho en Hollow Knight → **Propiedades** → **Versiones del juego y betas** → elige **1.5.78.11833 - Previous version**. Espera a que se descargue.
+2. Comprueba que el menú principal muestre `1.5.78.11833`.
+3. Abre Scarab → **Enable API**. Si no aparece o falla, usa la flechita junto a *Enable/Disable API* para reinstalarla.
+4. Arranca el juego una vez: en el menú debería aparecer el texto de la Modding API.
+
+Si cambias de versión, guarda una copia de tus partidas antes (`%AppData%\..\LocalLow\Team Cherry\Hollow Knight`).
 
 ## Decisiones del primer encuentro de prueba
 
@@ -100,10 +114,10 @@ Si faltan las DLL, la compilación se detiene con un mensaje que indica la ruta 
 ## Datos necesarios antes de insertar el jefe en el juego
 
 1. ~~Plataforma y tienda~~: Windows + Steam (confirmado).
-2. **Versión exacta de Hollow Knight** (menú principal, esquina inferior; por ejemplo 1.5.78.11833 o 1.4.3.2).
+2. ~~Versión de Hollow Knight~~: 1.5.12620, sin API compatible; hay que bajar a 1.5.78.11833 (ver *Versión del juego*).
 3. **Versión de la Modding API** que instaló Scarab (en Scarab aparece como *Modding API* / *API*).
-4. **Ruta completa de `Managed`** donde están `Assembly-CSharp.dll` y `Modding.dll` (en Steam/Windows suele ser `...\Hollow Knight\hollow_knight_Data\Managed`, pero debe confirmarse en tu equipo).
-5. **Ruta de la carpeta de mods** (normalmente `Managed/Mods`, también por confirmar).
+4. ~~Ruta de `Managed`~~: `D:\SteamLibrary\steamapps\common\Hollow Knight\hollow_knight_Data\Managed` (confirmada). No hace falta `Modding.dll`.
+5. **Carpeta de mods**: se espera `...\Managed\Mods`. Se confirmará cuando Scarab instale la API.
 6. ~~Dónde probar al jefe~~: arena propia a partir de tu imagen, con tecla de prueba (confirmado). Falta elegir **qué tecla**.
 7. **Otros mods instalados** que puedan interferir (por ejemplo, otros mods de jefes o de depuración).
 8. Si puedes, el `ModLog.txt` tras arrancar el juego con esta versión, para confirmar que el cargador encuentra la DLL y el manifiesto.

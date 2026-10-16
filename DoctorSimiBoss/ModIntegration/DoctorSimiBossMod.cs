@@ -14,7 +14,7 @@ namespace DoctorSimiBoss
     /// It does NOT insert the boss into any scene yet: the target game version, the Managed
     /// folder and the test location still have to be confirmed. Only the Modding API members
     /// already used by the original skeleton appear here (Mod, Initialize, Log, GetVersion);
-    /// they must still be checked by compiling against the player's Modding.dll.
+    /// they must still be checked by compiling against the player's API-patched Assembly-CSharp.dll.
     /// </summary>
     public sealed class DoctorSimiBossMod : Mod
     {

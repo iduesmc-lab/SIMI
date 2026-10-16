@@ -19,14 +19,15 @@
     </Compile>
   </ItemGroup>
 
-  <!-- Game assemblies come from the player's own installation; they are never copied to the output. -->
+  <!--
+    Game assemblies come from the player's own installation; they are never copied to the output.
+    The Modding API for Hollow Knight 1.5.78.11833 has no separate Modding.dll: its "Modding" types are
+    patched into Assembly-CSharp.dll when Scarab enables the API. Compiling against a vanilla
+    Assembly-CSharp.dll therefore fails with "The type or namespace name 'Modding' could not be found".
+  -->
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
       <HintPath>$(HollowKnightManagedDir)Assembly-CSharp.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Modding">
-      <HintPath>$(HollowKnightManagedDir)Modding.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>
@@ -52,7 +53,7 @@
   </ItemGroup>
 
   <Target Name="CheckHollowKnightRefs" BeforeTargets="ResolveAssemblyReferences">
-    <Error Condition="!Exists('$(HollowKnightManagedDir)Assembly-CSharp.dll') Or !Exists('$(HollowKnightManagedDir)Modding.dll')"
-           Text="Assembly-CSharp.dll and Modding.dll were not found in '$(HollowKnightManagedDir)'. Copy your game's Managed folder to ModIntegration/HollowKnightManaged or pass -p:HollowKnightRefs=&lt;path to Managed&gt;" />
+    <Error Condition="!Exists('$(HollowKnightManagedDir)Assembly-CSharp.dll')"
+           Text="Assembly-CSharp.dll was not found in '$(HollowKnightManagedDir)'. Copy your game's Managed folder to ModIntegration/HollowKnightManaged or pass -p:HollowKnightRefs=&lt;path to Managed&gt;" />
   </Target>
 </Project>
