@@ -78,7 +78,7 @@ dotnet test DoctorSimiBoss/Tests/DoctorSimiBoss.Core.Tests
 
 Mod (requiere la Modding API instalada en tu juego):
 
-1. Pon Hollow Knight en **1.5.78.11833** y activa la API con Scarab (ver *Versión del juego* más abajo).
+1. Pon Hollow Knight en **1.5.78.11833** y activa la API con Lumafly (ver *Versión del juego* más abajo).
 2. Compila apuntando a tu carpeta `Managed` (en Windows, desde PowerShell, con el .NET SDK instalado):
    ```
    dotnet build DoctorSimiBoss\ModIntegration\DoctorSimiBoss.csproj -c Release -p:HollowKnightRefs="D:\SteamLibrary\steamapps\common\Hollow Knight\hollow_knight_Data\Managed"
@@ -100,7 +100,7 @@ Si faltan las DLL, la compilación se detiene con un mensaje que indica la ruta 
 
 ## Versión del juego
 
-Tu juego está en **1.5.12620**. Las versiones de la Modding API publicadas en [hk-modding/api](https://github.com/hk-modding/api/releases) (hasta la v77) son para **1.5.78.11833**. Los avisos de Scarab y Lumafly sobre el parche 1.5.12459 indican que la API no funciona en los parches 1.5.12xxx, y no he encontrado ninguna versión para 1.5.12620. Por eso Scarab no ha puesto la API en tu carpeta.
+Tu juego está en **1.5.12620**. Las versiones de la Modding API publicadas en [hk-modding/api](https://github.com/hk-modding/api/releases) (hasta la v77) son para **1.5.78.11833**. Los avisos de Scarab y Lumafly sobre el parche 1.5.12459 indican que la API no funciona en los parches 1.5.12xxx, y no he encontrado ninguna versión para 1.5.12620. La API instalada (v77) solo funciona con el juego en 1.5.78.11833.
 
 Pasos:
 
@@ -124,7 +124,7 @@ Si cambias de versión, guarda una copia de tus partidas antes (`%AppData%\..\Lo
 2. ~~Versión de Hollow Knight~~: 1.5.12620, sin API compatible; hay que bajar a 1.5.78.11833 (ver *Versión del juego*).
 3. ~~Versión de la Modding API~~: v77 (1.5.78.11833-77), la que trae Scarab/Lumafly.
 4. ~~Ruta de `Managed`~~: `D:\SteamLibrary\steamapps\common\Hollow Knight\hollow_knight_Data\Managed` (confirmada). No hace falta `Modding.dll`.
-5. **Carpeta de mods**: se espera `...\Managed\Mods`. Se confirmará cuando Scarab instale la API.
+5. ~~Carpeta de mods~~: `...\Managed\Mods` (confirmada; ya existe).
 6. ~~Dónde probar al jefe~~: arena propia a partir de tu imagen, con tecla de prueba (confirmado). Falta elegir **qué tecla**.
 7. **Otros mods instalados** que puedan interferir (por ejemplo, otros mods de jefes o de depuración).
 8. Si puedes, el `ModLog.txt` tras arrancar el juego con esta versión, para confirmar que el cargador encuentra la DLL y el manifiesto.
