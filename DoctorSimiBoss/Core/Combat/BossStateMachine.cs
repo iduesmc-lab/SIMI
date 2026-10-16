@@ -5,7 +5,7 @@ using DoctorSimiBoss.Core.Manifest;
 
 namespace DoctorSimiBoss.Core.Combat
 {
-    public enum BossState { Idle, Move, Attack, Hurt, Stun, PhaseTransition, Defeated }
+    public enum BossState { Intro, Idle, Move, Attack, Hurt, Stun, PhaseTransition, Defeated }
 
     public enum AttackStage { None, Windup, Active, Recovery }
 
@@ -40,7 +40,7 @@ namespace DoctorSimiBoss.Core.Combat
         private int _hitsSinceStun;
         private bool _started;
 
-        public BossState State { get; private set; } = BossState.Idle;
+        public BossState State { get; private set; } = BossState.Intro;
         public int Phase { get; private set; }
         public int Health { get; private set; }
         public int MaxHealth => _tuning.MaxHealth;
@@ -57,7 +57,7 @@ namespace DoctorSimiBoss.Core.Combat
         /// <summary>Seconds left in the current state or attack stage.</summary>
         public float TimeRemaining => _timer;
 
-        public bool IsInvulnerable => State == BossState.PhaseTransition || State == BossState.Defeated;
+        public bool IsInvulnerable => State == BossState.Intro || State == BossState.PhaseTransition || State == BossState.Defeated;
         public bool IsAttackHitboxActive => State == BossState.Attack && AttackStage == AttackStage.Active;
 
         public event Action<BossState, BossState> StateChanged;
@@ -78,12 +78,16 @@ namespace DoctorSimiBoss.Core.Combat
             Phase = PhaseForPercent(100f);
         }
 
-        /// <summary>Begins the fight in Idle. Called automatically by the first Tick.</summary>
+        /// <summary>
+        /// Begins the fight with the entrance (Intro), or straight in Idle when IntroDuration is 0.
+        /// Called automatically by the first Tick or hit.
+        /// </summary>
         public void Start()
         {
             if (_started) return;
             _started = true;
-            Enter(BossState.Idle, _tuning.IdleBetweenActions);
+            if (_tuning.IntroDuration > 0) Enter(BossState.Intro, _tuning.IntroDuration);
+            else Enter(BossState.Idle, _tuning.IdleBetweenActions);
         }
 
         public void Tick(float deltaTime, float playerOffsetX)
@@ -114,6 +118,7 @@ namespace DoctorSimiBoss.Core.Combat
                         VelocityX = AttackStage == AttackStage.Active ? Facing * _tuning.MoveSpeed * CurrentAttack.ActiveSpeedMultiplier : 0;
                     break;
 
+                case BossState.Intro:
                 case BossState.Hurt:
                 case BossState.Stun:
                 case BossState.PhaseTransition:
@@ -125,8 +130,8 @@ namespace DoctorSimiBoss.Core.Combat
 
         public HitResult ReceiveHit(int damage)
         {
-            if (damage <= 0 || IsInvulnerable) return HitResult.Ignored;
             if (!_started) Start();
+            if (damage <= 0 || IsInvulnerable) return HitResult.Ignored;
 
             Health = Math.Max(0, Health - damage);
             if (Health == 0)

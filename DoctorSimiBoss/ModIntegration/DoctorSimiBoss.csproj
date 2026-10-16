@@ -31,7 +31,7 @@
     </Reference>
   </ItemGroup>
 
-  <!-- Only game-ready sprites/effects are shipped. References/ (concept art) is deliberately excluded. -->
+  <!-- Only game-ready sprites/effects and the arena PNG are shipped. References/ (concept art) is deliberately excluded. -->
   <ItemGroup>
     <Content Include="animation_manifest.json">
       <Link>Assets\animation_manifest.json</Link>
@@ -39,6 +39,10 @@
     </Content>
     <Content Include="..\Sprites\**\*.png">
       <Link>Assets\Sprites\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Arena\arena_background.png">
+      <Link>Assets\Arena\arena_background.png</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="..\Effects\**\*.png">

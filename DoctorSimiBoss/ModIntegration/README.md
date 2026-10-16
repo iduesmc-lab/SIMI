@@ -4,10 +4,11 @@
 
 | Parte | Estado |
 |---|---|
-| Lógica del jefe (`../Core`) | Implementada y con pruebas unitarias (51) en .NET 8. Compila para `net472` y `netstandard2.0` sin dependencias del juego. |
+| Lógica del jefe (`../Core`) | Implementada y con pruebas unitarias (60) en .NET 8. Compila para `net472` y `netstandard2.0` sin dependencias del juego. |
 | Lectura y validación del manifiesto | Implementada. Comprueba que existan los 48 cuadros, que sean PNG de 128 × 128, que las fases sean coherentes y que no se use arte conceptual como sprite. |
 | Entrada del mod (`DoctorSimiBossMod.cs`) | Carga y valida el manifiesto y lo escribe en el log. **No se ha compilado contra tus DLL reales** (`Modding.dll`, `Assembly-CSharp.dll`). Solo se comprobó su sintaxis y el empaquetado con stubs falsos. |
-| Inserción en una escena | **No implementada.** Depende de los datos de tu instalación (ver abajo). |
+| Arena | Tu imagen está en `../Arena/` con suelo, paredes y puntos de entrada medidos (provisionales). Se valida y se empaqueta. |
+| Inserción en una escena | **No implementada.** Faltan la versión del juego y la ruta de `Managed` (ver abajo). |
 | Jugable en Hollow Knight | **No.** Todavía no hay objeto del jefe en el juego, ni sprites cargados en Unity, ni colisiones. |
 
 ## Estructura
@@ -18,6 +19,7 @@ DoctorSimiBoss/
 │  ├─ Json/MiniJson.cs            Lector JSON propio (no se asume Newtonsoft en Managed)
 │  ├─ Manifest/                   Modelo, lector y validador de animation_manifest.json
 │  ├─ Combat/                     Máquina de estados, ajustes, catálogo de ataques y cerebro (IA)
+│  ├─ Arena/ArenaLayout.cs        Convierte las medidas en píxeles de la imagen a unidades de mundo
 │  ├─ Animation/                  Elige qué clip reproducir en cada estado (con provisionales)
 │  ├─ Hosting/IBossBody.cs        Lo que la escena debe proporcionar al jefe
 │  ├─ Hosting/BossDriver.cs       Conecta la máquina de estados con IBossBody
@@ -33,7 +35,9 @@ orientación, velocidad, activar/desactivar hitbox, efecto, derrota) y llamar a 
 
 ## Máquina de estados
 
-Estados: `Idle`, `Move`, `Attack`, `Hurt`, `Stun`, `PhaseTransition`, `Defeated`.
+Estados: `Intro`, `Idle`, `Move`, `Attack`, `Hurt`, `Stun`, `PhaseTransition`, `Defeated`.
+
+- **Intro**: entrada del jefe con la animación Spawn (salta y aterriza). Es invulnerable y no ataca durante `introDuration` (1 s).
 
 - **Idle → decisión**: al acabar la espera, el cerebro elige caminar, golpe básico o especial de la fase.
 - **Attack**: cada ataque pasa por `Windup` (anticipación, sin daño) → `Active` (hitbox activa) → `Recovery` (ventana de castigo). La orientación se bloquea durante todo el ataque. Los ataques tienen superarmadura: no se interrumpen por un golpe normal.
@@ -86,14 +90,21 @@ Si faltan las DLL, la compilación se detiene con un mensaje que indica la ruta 
 
 > La referencia previa a *ModdingAPI v77 para Hollow Knight 1.5.78.11833* y al ejemplo *Simple Hooks* viene del paquete original y **no se ha verificado** contra tu instalación.
 
+## Decisiones del primer encuentro de prueba
+
+- Plataforma: **Steam en Windows**, mods instalados con **Scarab**.
+- Acceso: **tecla de prueba** en cualquier sala que lleva a la arena (`encounter.access = "debugKey"`). La tecla aún no está elegida (`debugKey: null`).
+- Entrada: el jefe **salta y aterriza** con Spawn en `bossLandingX`.
+- Arena: **tu imagen como fondo** de una sala sencilla con suelo y paredes invisibles, sin escena nueva de Unity.
+
 ## Datos necesarios antes de insertar el jefe en el juego
 
-1. **Plataforma y tienda**: Windows / macOS / Linux; Steam / GOG / otra.
+1. ~~Plataforma y tienda~~: Windows + Steam (confirmado).
 2. **Versión exacta de Hollow Knight** (menú principal, esquina inferior; por ejemplo 1.5.78.11833 o 1.4.3.2).
-3. **Cargador de mods y su versión**: Modding API (y versión), instalado a mano o con Scarab/Lumafly, u otro.
+3. **Versión de la Modding API** que instaló Scarab (en Scarab aparece como *Modding API* / *API*).
 4. **Ruta completa de `Managed`** donde están `Assembly-CSharp.dll` y `Modding.dll` (en Steam/Windows suele ser `...\Hollow Knight\hollow_knight_Data\Managed`, pero debe confirmarse en tu equipo).
 5. **Ruta de la carpeta de mods** (normalmente `Managed/Mods`, también por confirmar).
-6. **Dónde probar al jefe**: una arena existente que quieras reutilizar (nombre exacto de la escena si lo conoces, o la zona/jefe del juego), una sala vacía, o aparecer mediante una tecla de depuración en cualquier sala.
+6. ~~Dónde probar al jefe~~: arena propia a partir de tu imagen, con tecla de prueba (confirmado). Falta elegir **qué tecla**.
 7. **Otros mods instalados** que puedan interferir (por ejemplo, otros mods de jefes o de depuración).
 8. Si puedes, el `ModLog.txt` tras arrancar el juego con esta versión, para confirmar que el cargador encuentra la DLL y el manifiesto.
 

@@ -52,6 +52,12 @@ namespace DoctorSimiBoss
             Definition = definition;
             Log("Boss definition ready: " + definition.Manifest.Phases.Count + " phases, max health " +
                 definition.Tuning.MaxHealth + ". Scene insertion is not implemented yet.");
+
+            var arena = definition.CreateArenaLayout();
+            if (arena != null)
+                Log("Arena: " + arena.Width.ToString("0.##") + " x " + arena.Height.ToString("0.##") +
+                    " world units, floor at y=" + arena.FloorY.ToString("0.##") +
+                    ", walls at x=" + arena.LeftWallX.ToString("0.##") + " and x=" + arena.RightWallX.ToString("0.##") + ".");
         }
     }
 }

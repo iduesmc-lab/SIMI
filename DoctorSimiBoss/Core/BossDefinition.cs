@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using DoctorSimiBoss.Core.Animation;
+using DoctorSimiBoss.Core.Arena;
 using DoctorSimiBoss.Core.Combat;
 using DoctorSimiBoss.Core.Manifest;
 
@@ -44,6 +45,12 @@ namespace DoctorSimiBoss.Core
         public BossStateMachine CreateStateMachine(IBossBrain brain)
         {
             return new BossStateMachine(Tuning, Manifest.Phases, Attacks, brain);
+        }
+
+        /// <summary>Arena geometry in world units, or null when the manifest declares no arena.</summary>
+        public ArenaLayout CreateArenaLayout()
+        {
+            return Manifest.Arena != null ? new ArenaLayout(Manifest.Arena) : null;
         }
 
         public BossAnimationResolver CreateAnimationResolver(PlaceholderPolicy policy)

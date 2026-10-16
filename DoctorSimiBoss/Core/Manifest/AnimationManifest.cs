@@ -32,6 +32,44 @@ namespace DoctorSimiBoss.Core.Manifest
 
         /// <summary>Optional prototype tuning; null when the manifest has no "tuning" block.</summary>
         public BossTuningData Tuning;
+
+        /// <summary>Arena background and walkable area; null when the manifest has no "arena" block.</summary>
+        public ArenaInfo Arena;
+
+        /// <summary>How the fight is reached and starts; null when the manifest has no "encounter" block.</summary>
+        public EncounterInfo Encounter;
+    }
+
+    /// <summary>
+    /// Arena drawn as a single background image. All coordinates are pixels of that image,
+    /// origin top-left, measured by eye and still to be calibrated in-game.
+    /// </summary>
+    public sealed class ArenaInfo
+    {
+        public string Background;
+        public int ImageWidth;
+        public int ImageHeight;
+        /// <summary>Image pixels per game world unit; sets the arena's size in the scene.</summary>
+        public float PixelsPerUnit;
+        /// <summary>Pixel row where feet rest on the stone platform.</summary>
+        public float FloorY;
+        /// <summary>Pixel columns of the invisible walls at each end of the platform.</summary>
+        public float LeftWallX;
+        public float RightWallX;
+        /// <summary>Pixel column where the boss lands after its entrance jump.</summary>
+        public float BossLandingX;
+        /// <summary>Pixel column where the player is placed when entering the arena.</summary>
+        public float PlayerEntryX;
+    }
+
+    public sealed class EncounterInfo
+    {
+        /// <summary>"debugKey" for now: a key press in any room takes the player to the arena.</summary>
+        public string Access;
+        /// <summary>Key name for the debug access; provisional until checked against other installed mods.</summary>
+        public string DebugKey;
+        /// <summary>Animation played by the boss when it enters (Spawn: jumps in and lands).</summary>
+        public string EntranceAnimation;
     }
 
     public sealed class AnimationClipInfo
@@ -99,6 +137,7 @@ namespace DoctorSimiBoss.Core.Manifest
         public float? StunDuration;
         public float? PhaseTransitionDuration;
         public float? SpecialChance;
+        public float? IntroDuration;
     }
 
     public static class AssetStatus

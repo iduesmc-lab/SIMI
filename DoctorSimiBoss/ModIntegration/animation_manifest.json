@@ -274,7 +274,8 @@
     "stunHitThreshold": 12,
     "stunDuration": 2.5,
     "phaseTransitionDuration": 1.5,
-    "specialChance": 0.45
+    "specialChance": 0.45,
+    "introDuration": 1.0
   },
   "conceptReferences": [
     {
@@ -321,5 +322,28 @@
       "path": "References/plush_reference_photo.png",
       "note": "Original reference photo provided by the user; never shipped with the mod."
     }
-  ]
+  ],
+  "arena": {
+    "note": "Single background image under a simple fight room. Pixel measurements taken by eye from the image; calibrate in-game.",
+    "background": "Assets/Arena/arena_background.png",
+    "sourceOriginal": "Arena/arena_background_original.webp",
+    "imageSize": {
+      "width": 1671,
+      "height": 941
+    },
+    "pixelsPerUnit": 40,
+    "floorY": 715,
+    "walls": {
+      "left": 200,
+      "right": 1475
+    },
+    "bossLandingX": 1150,
+    "playerEntryX": 420
+  },
+  "encounter": {
+    "note": "Chosen for the first in-game test: a debug key in any room takes the player to the arena; the boss jumps in and lands.",
+    "access": "debugKey",
+    "debugKey": null,
+    "entranceAnimation": "Spawn"
+  }
 }

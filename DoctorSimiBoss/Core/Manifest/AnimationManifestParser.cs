@@ -119,6 +119,37 @@ namespace DoctorSimiBoss.Core.Manifest
                     StunDuration = GetOptionalFloat(tuning, "stunDuration"),
                     PhaseTransitionDuration = GetOptionalFloat(tuning, "phaseTransitionDuration"),
                     SpecialChance = GetOptionalFloat(tuning, "specialChance"),
+                    IntroDuration = GetOptionalFloat(tuning, "introDuration"),
+                };
+            }
+
+            var arena = GetObject(root, "arena");
+            if (arena != null)
+            {
+                var size = GetObject(arena, "imageSize");
+                var walls = GetObject(arena, "walls");
+                manifest.Arena = new ArenaInfo
+                {
+                    Background = GetString(arena, "background"),
+                    ImageWidth = size != null ? (int)GetNumber(size, "width", 0) : 0,
+                    ImageHeight = size != null ? (int)GetNumber(size, "height", 0) : 0,
+                    PixelsPerUnit = (float)GetNumber(arena, "pixelsPerUnit", 0),
+                    FloorY = (float)GetNumber(arena, "floorY", 0),
+                    LeftWallX = walls != null ? (float)GetNumber(walls, "left", 0) : 0,
+                    RightWallX = walls != null ? (float)GetNumber(walls, "right", 0) : 0,
+                    BossLandingX = (float)GetNumber(arena, "bossLandingX", 0),
+                    PlayerEntryX = (float)GetNumber(arena, "playerEntryX", 0),
+                };
+            }
+
+            var encounter = GetObject(root, "encounter");
+            if (encounter != null)
+            {
+                manifest.Encounter = new EncounterInfo
+                {
+                    Access = GetString(encounter, "access"),
+                    DebugKey = GetString(encounter, "debugKey"),
+                    EntranceAnimation = GetString(encounter, "entranceAnimation"),
                 };
             }
 

@@ -36,11 +36,11 @@ namespace DoctorSimiBoss.Core.Tests
             return BossDefinition.Load(ManifestPath, ManifestPaths.ForSourcePackage(PackageRoot));
         }
 
-        /// <summary>Copies the real Sprites/Effects into a temp folder that tests may damage.</summary>
+        /// <summary>Copies the real Sprites, Effects and Arena into a temp folder that tests may damage.</summary>
         public static string CopyPackageToTemp()
         {
             string target = Path.Combine(Path.GetTempPath(), "simi-tests-" + Guid.NewGuid().ToString("N"));
-            foreach (var sub in new[] { "Sprites", "Effects" })
+            foreach (var sub in new[] { "Sprites", "Effects", "Arena" })
                 CopyDirectory(Path.Combine(PackageRoot, sub), Path.Combine(target, sub));
             return target;
         }

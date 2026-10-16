@@ -15,8 +15,10 @@ namespace DoctorSimiBoss.Core.Tests
 
         private readonly BossDefinition _def = TestSupport.LoadRealDefinition();
 
+        /// <summary>Fight-loop tests skip the entrance; IntroTests cover it.</summary>
         private BossStateMachine Create(IBossBrain brain, Action<BossTuning> tweak = null)
         {
+            _def.Tuning.IntroDuration = 0;
             tweak?.Invoke(_def.Tuning);
             return _def.CreateStateMachine(brain);
         }
@@ -354,6 +356,8 @@ namespace DoctorSimiBoss.Core.Tests
         }
 
         [Theory]
+        [InlineData(PlaceholderPolicy.PreferAvailable, BossState.Intro, "Spawn")]
+        [InlineData(PlaceholderPolicy.IdleAndAttackOnly, BossState.Intro, "Idle")]
         [InlineData(PlaceholderPolicy.PreferAvailable, BossState.Move, "Walk")]
         [InlineData(PlaceholderPolicy.PreferAvailable, BossState.Hurt, "Hurt")]
         [InlineData(PlaceholderPolicy.PreferAvailable, BossState.Stun, "Stun")]
@@ -370,6 +374,7 @@ namespace DoctorSimiBoss.Core.Tests
         [Fact]
         public void DriverPushesAnimationHitboxAndEffectToTheBody()
         {
+            _def.Tuning.IntroDuration = 0;
             var brain = new ScriptedBrain();
             brain.Script.Enqueue(ctx => BossAction.Perform(ctx.BasicAttack));
             var machine = _def.CreateStateMachine(brain);

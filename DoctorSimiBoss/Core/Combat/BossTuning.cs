@@ -22,6 +22,8 @@ namespace DoctorSimiBoss.Core.Combat
         public float PhaseTransitionDuration = 1.5f;
         /// <summary>Chance of choosing a special over the basic attack when one is allowed.</summary>
         public float SpecialChance = 0.45f;
+        /// <summary>Entrance (jump in and land) before the first decision; invulnerable meanwhile. 0 skips it.</summary>
+        public float IntroDuration = 1.0f;
 
         public static BossTuning FromData(BossTuningData data)
         {
@@ -37,6 +39,7 @@ namespace DoctorSimiBoss.Core.Combat
             if (data.StunDuration.HasValue) t.StunDuration = data.StunDuration.Value;
             if (data.PhaseTransitionDuration.HasValue) t.PhaseTransitionDuration = data.PhaseTransitionDuration.Value;
             if (data.SpecialChance.HasValue) t.SpecialChance = data.SpecialChance.Value;
+            if (data.IntroDuration.HasValue) t.IntroDuration = data.IntroDuration.Value;
             return t;
         }
     }

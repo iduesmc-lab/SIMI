@@ -40,12 +40,14 @@ namespace DoctorSimiBoss.Core.Animation
         private readonly AnimationManifest _manifest;
         private readonly ManifestReport _report;
         private readonly PlaceholderPolicy _policy;
+        private readonly string _entranceAnimation;
 
         public BossAnimationResolver(AnimationManifest manifest, ManifestReport report, PlaceholderPolicy policy)
         {
             _manifest = manifest ?? throw new ArgumentNullException(nameof(manifest));
             _report = report ?? throw new ArgumentNullException(nameof(report));
             _policy = policy;
+            _entranceAnimation = manifest.Encounter?.EntranceAnimation ?? "Spawn";
             if (!report.PlaceholdersAvailable)
                 throw new InvalidOperationException("Idle and Attack must be playable before the boss can be animated");
         }
@@ -54,6 +56,8 @@ namespace DoctorSimiBoss.Core.Animation
         {
             switch (state)
             {
+                case BossState.Intro:
+                    return Pick(_entranceAnimation, ManifestValidator.IdlePlaceholder);
                 case BossState.Attack:
                     return ResolveAttack(attack);
                 case BossState.Move:

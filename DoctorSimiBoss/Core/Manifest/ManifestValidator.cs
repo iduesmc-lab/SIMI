@@ -101,7 +101,51 @@ namespace DoctorSimiBoss.Core.Manifest
 
             CheckPhases(manifest, report);
             CheckSpecials(manifest, report);
+            CheckArena(manifest, resolvePath, report);
+            CheckEncounter(manifest, report);
             return report;
+        }
+
+        private static void CheckArena(AnimationManifest manifest, Func<string, string> resolvePath, ManifestReport report)
+        {
+            var a = manifest.Arena;
+            if (a == null) return;
+
+            if (string.IsNullOrEmpty(a.Background))
+            {
+                report.Errors.Add("Arena has no background image");
+            }
+            else
+            {
+                string path = resolvePath(a.Background);
+                if (path == null || !File.Exists(path))
+                    report.Errors.Add("Arena background not found: " + a.Background);
+                else
+                {
+                    string problem = CheckPng(path, a.ImageWidth, a.ImageHeight);
+                    if (problem != null) report.Errors.Add("Arena background " + a.Background + ": " + problem);
+                }
+            }
+
+            if (a.ImageWidth <= 0 || a.ImageHeight <= 0) report.Errors.Add("Arena imageSize must be positive");
+            if (a.PixelsPerUnit <= 0) report.Errors.Add("Arena pixelsPerUnit must be positive");
+            if (a.FloorY <= 0 || a.FloorY >= a.ImageHeight) report.Errors.Add("Arena floorY is outside the image");
+            if (a.LeftWallX < 0 || a.RightWallX > a.ImageWidth || a.LeftWallX >= a.RightWallX)
+                report.Errors.Add("Arena walls must satisfy 0 <= left < right <= image width");
+            if (a.BossLandingX <= a.LeftWallX || a.BossLandingX >= a.RightWallX)
+                report.Errors.Add("Arena bossLandingX must be between the walls");
+            if (a.PlayerEntryX <= a.LeftWallX || a.PlayerEntryX >= a.RightWallX)
+                report.Errors.Add("Arena playerEntryX must be between the walls");
+        }
+
+        private static void CheckEncounter(AnimationManifest manifest, ManifestReport report)
+        {
+            var e = manifest.Encounter;
+            if (e == null) return;
+            if (e.EntranceAnimation != null && !manifest.Animations.ContainsKey(e.EntranceAnimation))
+                report.Errors.Add("Encounter entranceAnimation '" + e.EntranceAnimation + "' is not a declared animation");
+            else if (e.EntranceAnimation != null && !report.IsPlayable(e.EntranceAnimation))
+                report.Warnings.Add("Entrance animation '" + e.EntranceAnimation + "' is not playable; the entrance will use " + IdlePlaceholder);
         }
 
         private static ClipCheck CheckClip(AnimationManifest manifest, AnimationClipInfo clip, ClipKind kind,
