@@ -48,3 +48,11 @@ Las cápsulas son proyectiles de fantasía, sin marcas ni referencias a medicame
 
 Se añadió References/saludo_cargado_concept_sheet.png para fijar las poses de Saludo cargado. Conserva un fondo oscuro generado y no tiene transparencia ni celdas listas para el juego; la secuencia final de PNG aún queda pendiente.
 
+## Cambio de enfoque (v0.7.0): sin golpes cuerpo a cuerpo
+
+El Caballero pelea a distancia corta y esquivando, así que los puñetazos directos no funcionan bien en este juego. El jefe ataca ahora con proyectiles y ondas, al estilo de Cuphead o de los jefes a distancia de Hollow Knight:
+
+- **Lanzamiento de cápsula** (ataque básico): lanza una cápsula en parábola que cae donde está el Caballero y revienta al tocar el suelo. Encadena de 1 a 3 lanzamientos según la fase y se usa a cualquier distancia.
+- **Saludo cargado**: tras cargar, dispara un abanico de tres cápsulas rectas dirigidas al Caballero. Ya no embiste con el puño.
+- **Carrera de pasillo** (embestida), Pisotón, Giro, Lluvia de cápsulas y Aplauso no cambian. El daño por contacto con su cuerpo se mantiene.
+- No hay caja de daño en el puño: `hitboxes.punch` solo marca desde dónde salen los proyectiles.

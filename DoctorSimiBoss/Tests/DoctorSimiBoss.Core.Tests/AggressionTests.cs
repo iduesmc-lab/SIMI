@@ -52,7 +52,7 @@ namespace DoctorSimiBoss.Core.Tests
         }
 
         [Fact]
-        public void FarAwayTheBrainLeapsOrWalksAndNeverChainsSpecials()
+        public void FarAwayTheBrainThrowsOrLeaps()
         {
             var brain = new DefaultBossBrain(new Random(3));
             var tuning = new BossTuning { SpecialChance = 0f, MaxCombo = 3 };
@@ -67,7 +67,7 @@ namespace DoctorSimiBoss.Core.Tests
                 });
                 kinds.Add(action.Kind == BossActionKind.Attack ? action.Attack.Id : action.Kind.ToString());
             }
-            Assert.Equal(new HashSet<string> { "Brinco", "Move" }, kinds);
+            Assert.Equal(new HashSet<string> { AttackCatalog.BasicAttackId, AttackCatalog.LeapAttackId }, kinds);
         }
 
         [Fact]

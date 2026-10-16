@@ -328,7 +328,7 @@ namespace DoctorSimiBoss.Core.Tests
         }
 
         [Fact]
-        public void DefaultBrainWalksWhenFarUnlessItPicksARangedSpecial()
+        public void DefaultBrainThrowsFromAfarInsteadOfWalking()
         {
             var brain = new DefaultBossBrain(new Random(7));
             var ctx = new BrainContext
@@ -339,11 +339,14 @@ namespace DoctorSimiBoss.Core.Tests
                 BasicAttack = _def.Attacks.Basic,
                 PhaseSpecials = _def.Attacks.SpecialsForPhase(1),
             };
-            Assert.Equal(BossActionKind.Move, brain.Decide(ctx).Kind);
+            // The basic attack is a thrown capsule, so from far away the boss throws (or leaps) instead of walking.
+            var far = brain.Decide(ctx);
+            Assert.Equal(BossActionKind.Attack, far.Kind);
+            Assert.Contains(far.Attack.Id, new[] { AttackCatalog.BasicAttackId, AttackCatalog.LeapAttackId });
 
             ctx.Tuning = new BossTuning { SpecialChance = 1f };
             var action = brain.Decide(ctx);
-            Assert.Equal("PisotonSimi", action.Attack.Id); // the only ranged special in phase 1
+            Assert.True(action.Attack.IsSpecial && action.Attack.Ranged, "both phase 1 specials are ranged now");
         }
     }
 
@@ -426,7 +429,7 @@ namespace DoctorSimiBoss.Core.Tests
             driver.Tick(_def.Attacks.Basic.Active);
             Assert.False(body.HitboxActive);
 
-            Assert.Equal(new[] { "anim:Idle", "anim:Attack", "hitbox-on:GolpeBasico", "effect:PunchImpact", "hitbox-off:GolpeBasico" },
+            Assert.Equal(new[] { "anim:Idle", "anim:Attack", "hitbox-on:Lanzamiento", "effect:PunchImpact", "hitbox-off:Lanzamiento" },
                          body.Log.ToArray());
 
             driver.ReceiveHit(5000);

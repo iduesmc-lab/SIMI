@@ -22,7 +22,6 @@ namespace DoctorSimiBoss.Scene
     internal sealed class DoctorSimiBody : MonoBehaviour, IBossBody, IHitResponder
     {
         private const float HitDedupSeconds = 0.15f;
-        private const float FlashSeconds = 0.1f;
         private const int CapsuleLanes = 7;
 
         private BossDefinition _definition;
@@ -36,7 +35,8 @@ namespace DoctorSimiBoss.Scene
         private SpriteRenderer _renderer;
         private FramePlayer _player;
         private GameObject _contact;
-        private GameObject _punch;
+        private WhiteFlash _whiteFlash;
+        private EnemyHitEffectsUninfected _hitEffects; // Hollow Knight's own hit sound/particles, if a donor was found
         private float _velocityX;      // target from the state machine
         private float _currentVx;      // smoothed actual speed
         private GameObject _visual;    // sprite child: deformed by the procedural animator, colliders stay on the root
@@ -46,7 +46,6 @@ namespace DoctorSimiBoss.Scene
         private float _ghostTimer;
         private int _facing = -1;
         private float _halfWidth;
-        private float _flashTimer;
         private GameObject _lastHitSource;
         private float _lastHitTime = -1f;
 
@@ -125,8 +124,12 @@ namespace DoctorSimiBoss.Scene
             // HeroBox only checks that a DamageHero component exists, so damage areas are switched
             // off by deactivating their GameObject (entrance, phase change, defeat).
             _contact = CreateDamageArea("Contact Damage", bodyBox, definition.Tuning.ContactDamage);
-            _punch = CreateDamageArea("Punch", FrameGeometry.ToLocal(manifest, manifest.PunchBox, -1), definition.Tuning.AttackDamage);
-            _punch.SetActive(false);
+            // No melee hitbox: the boss attacks with projectiles, waves, the dash and its body.
+            // hitboxes.punch is only used as the hand position projectiles are thrown from.
+            _whiteFlash = WhiteFlash.Create(_renderer);
+            _hitEffects = HitEffectsDonor.AttachTo(gameObject, new Vector3(0f, bodyBox.CenterY * bossScale, 0f));
+            _log(_hitEffects != null ? "Boss uses Hollow Knight's enemy hit effects."
+                                     : "No enemy hit effects found yet (visit a room with normal enemies first); using the white flash only.");
 
             var machine = definition.CreateStateMachine(new DefaultBossBrain(new System.Random()));
             machine.PhaseChanged += (from, to) => _log("Phase " + from + " -> " + to + " (" + machine.Health + "/" + machine.MaxHealth + ")");
@@ -201,12 +204,6 @@ namespace DoctorSimiBoss.Scene
 
         private void UpdateTint(float dt)
         {
-            if (_flashTimer > 0)
-            {
-                _flashTimer -= dt;
-                _renderer.color = new Color(1f, 0.55f, 0.55f);
-                return;
-            }
             if (_stage == AttackStage.Windup && _stageAttack != null && _stageAttack.IsSpecial)
             {
                 // Telegraph: the reflective bands "light up" before a special.
@@ -238,6 +235,14 @@ namespace DoctorSimiBoss.Scene
             {
                 case AttackCatalog.LeapAttackId:
                     if (stage == AttackStage.Active) StartArc(targetX, 3.2f, attack.Active, false, 0f);
+                    break;
+
+                case AttackCatalog.BasicAttackId:
+                    if (stage == AttackStage.Active) ThrowLob(heroX);
+                    break;
+
+                case "SaludoCargado":
+                    if (stage == AttackStage.Active) FanShot(hero);
                     break;
 
                 case "PisotonSimi":
@@ -389,6 +394,55 @@ namespace DoctorSimiBoss.Scene
             }
         }
 
+        /// <summary>Where projectiles leave the hand (hitboxes.punch), in world space.</summary>
+        private Vector3 HandPosition()
+        {
+            var box = FrameGeometry.ToLocal(_definition.Manifest, _definition.Manifest.PunchBox, _facing);
+            float s = transform.localScale.x;
+            return transform.position + new Vector3(box.CenterX * s, box.CenterY * s, 0f);
+        }
+
+        private Hazard SpawnCapsule(Vector3 start, Vector2 velocity, float gravity, float spin, float rotation)
+        {
+            var art = _sprites.Get("Capsule");
+            var frames = art ?? new[] { ProceduralSprites.Capsule };
+            var collider = art != null ? new Vector2(1.2f, 0.6f) : new Vector2(0.5f, 1.2f);
+            var hazard = Hazard.Spawn(transform.parent, "Capsule", frames, 6f, false, rotation, start, Vector2.one,
+                                      collider, Vector2.zero, velocity, 6f, _layers.EnemyDamage, _definition.Tuning.AttackDamage,
+                                      LeftWall - 0.5f, RightWall + 0.5f, Floor, true,
+                                      p => SpawnEffect("CapsuleBurst", p + new Vector3(0f, 0.4f, 0f), false));
+            hazard.Gravity = gravity;
+            hazard.Spin = spin;
+            return hazard;
+        }
+
+        /// <summary>Basic attack: lobs a tumbling capsule that lands where the Knight is standing.</summary>
+        private void ThrowLob(float targetX)
+        {
+            const float gravity = 28f, flightTime = 0.85f;
+            var start = HandPosition();
+            float vx = (targetX - start.x) / flightTime;
+            float vy = (Floor - start.y + 0.5f * gravity * flightTime * flightTime) / flightTime;
+            SpawnCapsule(start, new Vector2(vx, vy), gravity, 540f * -Mathf.Sign(vx == 0 ? _facing : vx), 0f);
+        }
+
+        /// <summary>Saludo cargado: three fast capsules in a fan, aimed at the Knight's chest.</summary>
+        private void FanShot(HeroController hero)
+        {
+            const float speed = 16f;
+            var start = HandPosition();
+            Vector2 aim = hero != null ? (Vector2)(hero.transform.position + new Vector3(0f, 0.3f, 0f) - start) : new Vector2(_facing, 0f);
+            if (aim.sqrMagnitude < 0.01f) aim = new Vector2(_facing, 0f);
+            float baseAngle = Mathf.Atan2(aim.y, aim.x) * Mathf.Rad2Deg;
+            foreach (float spread in new[] { -12f, 0f, 12f })
+            {
+                float angle = baseAngle + spread;
+                var dir = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
+                // The HD capsule is drawn lying horizontally, so it points along its flight direction.
+                SpawnCapsule(start, dir * speed, 0f, 0f, angle);
+            }
+        }
+
         private void DropCapsule(float x)
         {
             var art = _sprites.Get("Capsule");
@@ -425,8 +479,8 @@ namespace DoctorSimiBoss.Scene
             var result = _driver.ReceiveHit(damage);
             if (result == HitResult.Ignored) return;
 
-            _flashTimer = FlashSeconds;
-            _motion.Hit(0.5f);
+            _whiteFlash.Flash();
+            if (_hitEffects != null) _hitEffects.RecieveHitEffect(damageInstance.GetActualDirection(transform));
             if (damageInstance.AttackType == AttackTypes.Nail && HeroController.instance != null)
                 HeroController.instance.SoulGain();
             if (result == HitResult.Stunned) _log("Stunned (" + _driver.Machine.Health + "/" + _driver.Machine.MaxHealth + ")");
@@ -459,17 +513,13 @@ namespace DoctorSimiBoss.Scene
             _facing = direction;
             _renderer.flipX = FrameGeometry.NeedsFlip(_definition.Manifest, direction);
             PlaceBox(_contact, _definition.Manifest.BodyBox);
-            PlaceBox(_punch, _definition.Manifest.PunchBox);
         }
 
         public void SetVelocityX(float velocity) { _velocityX = velocity; }
 
         public void SetAttackActive(AttackDefinition attack, bool active)
         {
-            // Only punching attacks use the fist hitbox; jumps, waves and capsules damage by themselves.
-            bool usesFist = attack.Id == AttackCatalog.BasicAttackId || attack.Id == "SaludoCargado";
-            PlaceBox(_punch, _definition.Manifest.PunchBox);
-            _punch.SetActive(active && usesFist);
+            // Nothing to switch: there is no melee hitbox. Projectiles are spawned in OnAttackStage.
         }
 
         public void PlayEffect(string effectName)
@@ -481,7 +531,6 @@ namespace DoctorSimiBoss.Scene
 
         public void OnDefeated()
         {
-            _punch.SetActive(false);
             _contact.SetActive(false);
             _schedule.Clear();
             EndArc();

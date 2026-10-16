@@ -64,15 +64,18 @@ namespace DoctorSimiBoss.Core.Combat
             if (specials.Count > 0 && _random.NextDouble() < ctx.Tuning.SpecialChance)
                 return BossAction.Perform(specials[_random.Next(specials.Count)]);
 
-            if (inRange)
+            bool basicUsable = ctx.BasicAttack != null && (inRange || ctx.BasicAttack.Ranged);
+            // From far away, sometimes close the distance instead of throwing.
+            if (!inRange && ctx.LeapAttack != null && _random.NextDouble() < (basicUsable ? 0.25 : 0.5))
+                return BossAction.Perform(ctx.LeapAttack);
+            if (basicUsable)
             {
-                // Phase 1 chains up to 2 punches, later phases up to MaxCombo.
+                // Phase 1 chains up to 2 throws, later phases up to MaxCombo.
                 int maxCombo = Math.Max(1, Math.Min(ctx.Tuning.MaxCombo, ctx.Phase + 1));
-                var punch = BossAction.Perform(ctx.BasicAttack);
-                punch.ComboExtra = _random.Next(maxCombo);
-                return punch;
+                var basic = BossAction.Perform(ctx.BasicAttack);
+                basic.ComboExtra = _random.Next(maxCombo);
+                return basic;
             }
-            if (ctx.LeapAttack != null && _random.NextDouble() < 0.5) return BossAction.Perform(ctx.LeapAttack);
             return BossAction.Move(ctx.Tuning.MoveDuration);
         }
     }

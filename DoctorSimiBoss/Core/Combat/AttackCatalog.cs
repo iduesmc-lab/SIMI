@@ -41,7 +41,8 @@ namespace DoctorSimiBoss.Core.Combat
     /// </summary>
     public sealed class AttackCatalog
     {
-        public const string BasicAttackId = "GolpeBasico";
+        /// <summary>Basic attack: lobs a capsule at the player (no melee punches; the Knight fights at range).</summary>
+        public const string BasicAttackId = "Lanzamiento";
         public const string LeapAttackId = "Brinco";
         public const string PunchImpactEffect = "PunchImpact";
 
@@ -124,7 +125,8 @@ namespace DoctorSimiBoss.Core.Combat
             return new AttackDefinition
             {
                 Id = BasicAttackId,
-                DisplayName = "Golpe",
+                DisplayName = "Lanzamiento de cápsula",
+                Ranged = true,
                 IsSpecial = false,
                 Phase = 0,
                 PlannedAnimation = ManifestValidator.AttackPlaceholder,
@@ -165,8 +167,8 @@ namespace DoctorSimiBoss.Core.Combat
         {
             switch (a.Id)
             {
-                case "SaludoCargado": // charged horizontal punch, recovery after a miss
-                    Set(a, 0.8f, 0.35f, 0.8f); a.ActiveSpeedMultiplier = 4f; a.ImpactEffect = PunchImpactEffect; a.Ranged = true; break;
+                case "SaludoCargado": // charges, then fires a fan of three capsules straight at the player
+                    Set(a, 0.8f, 0.35f, 0.8f); a.ImpactEffect = PunchImpactEffect; a.Ranged = true; break;
                 case "PisotonSimi": // short jump, ground wave on landing
                     Set(a, 0.6f, 0.4f, 0.8f); a.Ranged = true; break;
                 case "CarreraPasillo": // straight dash across the arena, brief stun when braking

@@ -61,6 +61,11 @@ namespace DoctorSimiBoss.Scene
         private bool _stopAtFloor;
         private System.Action<Vector3> _onFloor;
 
+        /// <summary>Downward acceleration (units/s²) for lobbed projectiles; 0 flies straight.</summary>
+        public float Gravity;
+        /// <summary>Rotation speed in degrees per second (tumbling capsules).</summary>
+        public float Spin;
+
         /// <param name="frames">Animated sprites (looped at <paramref name="fps"/>); a single frame is a still sprite.</param>
         /// <param name="colliderSize">Collider in the object's local units (before scale and rotation).</param>
         public static Hazard Spawn(Transform parent, string name, Sprite[] frames, float fps, bool flipX, float rotation,
@@ -106,6 +111,8 @@ namespace DoctorSimiBoss.Scene
         {
             float dt = Time.deltaTime;
             _life -= dt;
+            _velocity.y -= Gravity * dt;
+            if (Spin != 0f) transform.Rotate(0f, 0f, Spin * dt);
             var p = transform.position + (Vector3)(_velocity * dt);
             transform.position = p;
             bool landed = _stopAtFloor && p.y <= _floorY;

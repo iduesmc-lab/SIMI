@@ -39,6 +39,7 @@ namespace DoctorSimiBoss.Scene
             controller._key = key;
             controller._log = log;
             UnitySceneManager.activeSceneChanged += controller.OnActiveSceneChanged;
+            HitEffectsDonor.TryCapture(log);
         }
 
         private void OnDestroy()
@@ -48,6 +49,7 @@ namespace DoctorSimiBoss.Scene
 
         private void OnActiveSceneChanged(UnityEngine.SceneManagement.Scene from, UnityEngine.SceneManagement.Scene to)
         {
+            HitEffectsDonor.TryCapture(_log);
             if (_arenaRoot == null && _boss == null) return;
             // The arena belonged to the old scene and was destroyed with it; the camera re-initialises its limits.
             _arenaRoot = null;
@@ -84,6 +86,7 @@ namespace DoctorSimiBoss.Scene
             float roomWidth = cameraCtrl.sceneWidth > 0 ? cameraCtrl.sceneWidth : hero.transform.position.x + 100f;
             var origin = new Vector2(roomWidth + GapAfterRoom, 0f);
 
+            HitEffectsDonor.TryCapture(_log);
             var layers = LayerChoice.Pick(_log);
             _savedXLimit = cameraCtrl.xLimit;
             _savedYLimit = cameraCtrl.yLimit;

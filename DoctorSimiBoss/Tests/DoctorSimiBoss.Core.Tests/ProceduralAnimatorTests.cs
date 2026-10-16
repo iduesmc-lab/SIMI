@@ -23,26 +23,35 @@ namespace DoctorSimiBoss.Core.Tests
         }
 
         [Fact]
-        public void IdleBreathesGentlyAndStaysBounded()
+        public void IdleWalkAndStunStayStill()
         {
-            var a = new ProceduralAnimator();
-            float min = 9, max = -9;
-            Run(a, 5f, BossState.Idle, each: p => { min = Math.Min(min, p.ScaleY); max = Math.Max(max, p.ScaleY); });
-            Assert.True(max > 1.01f && min < 0.99f, "breathing is visible");
-            Assert.True(max < 1.05f && min > 0.95f, "but subtle");
+            // No breathing, bobbing, leaning or wobble: the drawn frames carry those states.
+            foreach (var state in new[] { BossState.Idle, BossState.Move, BossState.Stun, BossState.PhaseTransition, BossState.Hurt })
+            {
+                var a = new ProceduralAnimator();
+                Run(a, 3f, state, each: p =>
+                {
+                    Assert.Equal(1f, p.ScaleY, 3);
+                    Assert.Equal(0f, p.Lean, 3);
+                    Assert.Equal(0f, p.OffsetY, 3);
+                });
+            }
         }
 
         [Fact]
-        public void WindupSquashesAndLeansBackThenStrikeLeansForward()
+        public void WindupCrouchesWithoutLeaningAndHitsDoNotDeform()
         {
             var a = new ProceduralAnimator();
             var saludo = _def.Attacks.Get("SaludoCargado");
             Run(a, 0.8f, BossState.Attack, AttackStage.Windup, saludo, t => t);
-            Assert.True(a.Pose.ScaleY < 0.95f, "crouched during anticipation");
-            Assert.True(a.Pose.Lean < -4f, "leaning back");
+            Assert.True(a.Pose.ScaleY < 0.97f && a.Pose.ScaleY > 0.9f, "small crouch during anticipation");
+            Assert.Equal(0f, a.Pose.Lean, 3);
             a.Strike();
-            Run(a, 0.15f, BossState.Attack, AttackStage.Active, saludo);
-            Assert.True(a.Pose.Lean > 3f, "leaning into the punch");
+            Run(a, 0.2f, BossState.Attack, AttackStage.Active, saludo, each: p => Assert.Equal(0f, p.Lean, 3));
+
+            var b = new ProceduralAnimator();
+            b.Hit();
+            Run(b, 0.5f, BossState.Idle, each: p => Assert.Equal(1f, p.ScaleY, 3));
         }
 
         [Fact]
@@ -53,9 +62,9 @@ namespace DoctorSimiBoss.Core.Tests
             a.Land();
             float lowest = 9;
             Run(a, 0.15f, BossState.Idle, each: p => lowest = Math.Min(lowest, p.ScaleY));
-            Assert.True(lowest < 0.92f, "visible squash on landing");
+            Assert.True(lowest < 0.95f, "visible squash on landing");
             Run(a, 1.5f, BossState.Idle);
-            Assert.InRange(a.Pose.ScaleY, 0.96f, 1.04f);
+            Assert.Equal(1f, a.Pose.ScaleY, 2);
         }
 
         [Fact]
@@ -63,7 +72,7 @@ namespace DoctorSimiBoss.Core.Tests
         {
             var a = new ProceduralAnimator();
             Run(a, 0.3f, BossState.Attack, AttackStage.Active, _def.Attacks.Leap, airborne: true, vy: 10f);
-            Assert.True(a.Pose.ScaleY > 1.08f && a.Pose.ScaleX < 1f);
+            Assert.True(a.Pose.ScaleY > 1.04f && a.Pose.ScaleX < 1f);
 
             var off = new ProceduralAnimator { Intensity = 0f };
             off.Land(); off.Hit(); off.Strike();
