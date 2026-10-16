@@ -1,0 +1,219 @@
+{
+  "name": "DoctorSimiBoss",
+  "schemaVersion": 1,
+  "status": "visual-prototype",
+  "frameSize": {
+    "width": 128,
+    "height": 128
+  },
+  "origin": {
+    "x": 0.5,
+    "y": 0.9,
+    "note": "Provisional normalized pivot; calibrate in-game."
+  },
+  "animations": {
+    "Spawn": {
+      "loop": false,
+      "fps": 10,
+      "frames": [
+        "Assets/Sprites/Spawn/spawn_00.png",
+        "Assets/Sprites/Spawn/spawn_01.png",
+        "Assets/Sprites/Spawn/spawn_02.png",
+        "Assets/Sprites/Spawn/spawn_03.png",
+        "Assets/Sprites/Spawn/spawn_04.png",
+        "Assets/Sprites/Spawn/spawn_05.png"
+      ]
+    },
+    "Idle": {
+      "loop": true,
+      "fps": 6,
+      "frames": [
+        "Assets/Sprites/Idle/idle_00.png",
+        "Assets/Sprites/Idle/idle_01.png",
+        "Assets/Sprites/Idle/idle_02.png",
+        "Assets/Sprites/Idle/idle_03.png",
+        "Assets/Sprites/Idle/idle_04.png",
+        "Assets/Sprites/Idle/idle_05.png"
+      ]
+    },
+    "Walk": {
+      "loop": true,
+      "fps": 9,
+      "frames": [
+        "Assets/Sprites/Walk/walk_00.png",
+        "Assets/Sprites/Walk/walk_01.png",
+        "Assets/Sprites/Walk/walk_02.png",
+        "Assets/Sprites/Walk/walk_03.png",
+        "Assets/Sprites/Walk/walk_04.png",
+        "Assets/Sprites/Walk/walk_05.png"
+      ]
+    },
+    "Attack": {
+      "loop": false,
+      "fps": 12,
+      "suggestedDamageFrame": 3,
+      "frames": [
+        "Assets/Sprites/Attack/attack_00.png",
+        "Assets/Sprites/Attack/attack_01.png",
+        "Assets/Sprites/Attack/attack_02.png",
+        "Assets/Sprites/Attack/attack_03.png",
+        "Assets/Sprites/Attack/attack_04.png",
+        "Assets/Sprites/Attack/attack_05.png"
+      ]
+    },
+    "Hurt": {
+      "loop": false,
+      "fps": 10,
+      "frames": [
+        "Assets/Sprites/Hurt/hurt_00.png",
+        "Assets/Sprites/Hurt/hurt_01.png",
+        "Assets/Sprites/Hurt/hurt_02.png",
+        "Assets/Sprites/Hurt/hurt_03.png",
+        "Assets/Sprites/Hurt/hurt_04.png",
+        "Assets/Sprites/Hurt/hurt_05.png"
+      ]
+    },
+    "Stun": {
+      "loop": true,
+      "fps": 6,
+      "frames": [
+        "Assets/Sprites/Stun/stun_00.png",
+        "Assets/Sprites/Stun/stun_01.png",
+        "Assets/Sprites/Stun/stun_02.png",
+        "Assets/Sprites/Stun/stun_03.png",
+        "Assets/Sprites/Stun/stun_04.png",
+        "Assets/Sprites/Stun/stun_05.png"
+      ]
+    },
+    "Defeat": {
+      "loop": false,
+      "fps": 8,
+      "frames": [
+        "Assets/Sprites/Defeat/defeat_00.png",
+        "Assets/Sprites/Defeat/defeat_01.png",
+        "Assets/Sprites/Defeat/defeat_02.png",
+        "Assets/Sprites/Defeat/defeat_03.png",
+        "Assets/Sprites/Defeat/defeat_04.png",
+        "Assets/Sprites/Defeat/defeat_05.png"
+      ]
+    }
+  },
+  "effects": {
+    "PunchImpact": {
+      "loop": false,
+      "fps": 12,
+      "suggestedSync": "Attack frame 03; confirm against hitbox timing in-game.",
+      "frames": [
+        "Assets/Effects/PunchImpact/impact_00.png",
+        "Assets/Effects/PunchImpact/impact_01.png",
+        "Assets/Effects/PunchImpact/impact_02.png",
+        "Assets/Effects/PunchImpact/impact_03.png",
+        "Assets/Effects/PunchImpact/impact_04.png",
+        "Assets/Effects/PunchImpact/impact_05.png"
+      ]
+    }
+  },
+  "integrationNotes": [
+    "Frame timing, scale, pivot, hitboxes, and damage frame are provisional.",
+    "This manifest is data only; it does not spawn or animate a boss in Hollow Knight."
+  ],
+  "encounterPhases": [
+    {
+      "id": 1,
+      "healthPercent": {
+        "from": 100,
+        "to": 66
+      },
+      "specials": [
+        "SaludoCargado",
+        "PisonSimi"
+      ],
+      "name": "Turno de bienvenida"
+    },
+    {
+      "id": 2,
+      "healthPercent": {
+        "from": 65,
+        "to": 33
+      },
+      "specials": [
+        "CarreraPasillo",
+        "GiroBotarga"
+      ],
+      "name": "Ronda express"
+    },
+    {
+      "id": 3,
+      "healthPercent": {
+        "from": 32,
+        "to": 0
+      },
+      "specials": [
+        "LluviaCapsulas",
+        "AplausoSalida"
+      ],
+      "name": "Ultima visita"
+    }
+  ],
+  "plannedSpecials": [
+    {
+      "assetStatus": "concept-only",
+      "frameCount": 6,
+      "animation": "SpecialPunch",
+      "phase": 1,
+      "id": "SaludoCargado",
+      "conceptPoses": [
+        1,
+        2
+      ]
+    },
+    {
+      "assetStatus": "concept-only",
+      "frameCount": 6,
+      "animation": "SpecialSlam",
+      "phase": 1,
+      "id": "PisonSimi",
+      "conceptPoses": [
+        3
+      ]
+    },
+    {
+      "assetStatus": "concept-only",
+      "frameCount": 6,
+      "animation": "SpecialDash",
+      "phase": 2,
+      "id": "CarreraPasillo",
+      "conceptPoses": [
+        4
+      ]
+    },
+    {
+      "assetStatus": "concept-only",
+      "frameCount": 6,
+      "animation": "SpecialSpin",
+      "phase": 2,
+      "id": "GiroBotarga",
+      "conceptPoses": [
+        5
+      ]
+    },
+    {
+      "assetStatus": "design-only",
+      "frameCount": 6,
+      "animation": "SpecialCapsules",
+      "phase": 3,
+      "id": "LluviaCapsulas",
+      "conceptPoses": []
+    },
+    {
+      "assetStatus": "concept-only",
+      "frameCount": 6,
+      "animation": "SpecialWave",
+      "phase": 3,
+      "id": "AplausoSalida",
+      "conceptPoses": [
+        6
+      ]
+    }
+  ]
+}

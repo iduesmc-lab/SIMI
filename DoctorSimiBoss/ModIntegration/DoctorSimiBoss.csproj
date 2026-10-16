@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <AssemblyTitle>DoctorSimiBoss</AssemblyTitle>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <FileVersion>0.1.0.0</FileVersion>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <LangVersion>latest</LangVersion>
+    <HollowKnightRefs Condition="'$(HollowKnightRefs)' == ''">$(MSBuildThisFileDirectory)HollowKnightManaged\</HollowKnightRefs>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(HollowKnightRefs)Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Modding">
+      <HintPath>$(HollowKnightRefs)Modding.dll</HintPath>
+    </Reference>
+    <Content Include="animation_manifest.json">
+      <Link>Assets\animation_manifest.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Sprites\**\*.png">
+      <Link>Assets\Sprites\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\Effects\**\*.png">
+      <Link>Assets\Effects\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+</Project>

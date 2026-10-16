@@ -1,0 +1,1 @@
+Secuencia de seis cuadros: tambaleo débil, rodillas ceden, cae sobre una rodilla, se desploma de lado y termina inmóvil. Prototipo no gráfico; el último cuadro puede mantenerse en el juego como pose final.

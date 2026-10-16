@@ -1,0 +1,1 @@
+Efecto independiente de seis cuadros: destello de contacto, expansión, fragmentos y chispa final. Prototipo transparente de 128 × 128 px por cuadro; sincronizar con el cuadro activo del golpe en Attack.

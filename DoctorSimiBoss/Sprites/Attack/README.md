@@ -1,0 +1,1 @@
+Secuencia de seis cuadros: 00 guardia, 01 anticipación, 02 inicio del golpe, 03 extensión, 04 recuperación, 05 vuelta a guardia. Prototipo visual; la velocidad y el fotograma activo deben ajustarse al integrar la lógica de combate.

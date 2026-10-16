@@ -1,0 +1,1 @@
+Secuencia de seis cuadros: 00 postura lista, 01 sobresalto, 02 tambaleo fuerte, 03 pérdida de equilibrio, 04 recuperación, 05 regreso a postura lista. Prototipo visual; la duración y la posible invulnerabilidad deben ajustarse en el controlador del juego.

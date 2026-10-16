@@ -1,0 +1,1 @@
+Secuencia en bucle de seis cuadros: balanceo hacia un lado, tambaleo al otro, mano a la cabeza y vuelta a la postura aturdida. Prototipo visual; el tiempo de permanencia debe controlarse desde el juego.

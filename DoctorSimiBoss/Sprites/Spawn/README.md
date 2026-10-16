@@ -1,0 +1,1 @@
+Secuencia de seis cuadros: 00 se agacha, 01 se impulsa, 02 asciende, 03 llega al punto alto del salto, 04 aterriza y 05 entra en guardia. Prototipo visual; ajustar altura, pivote y tiempo al integrarlo.
