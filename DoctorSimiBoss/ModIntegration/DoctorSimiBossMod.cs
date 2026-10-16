@@ -1,32 +1,57 @@
+using System;
 using System.IO;
 using System.Reflection;
+using DoctorSimiBoss.Core;
+using DoctorSimiBoss.Core.Manifest;
 using Modding;
 
 namespace DoctorSimiBoss
 {
     /// <summary>
-    /// Loader entry point for the Doctor Simi visual prototype.
-    /// This only verifies that the packaged manifest is present; boss spawning,
-    /// runtime texture creation, AI, and damage logic are not implemented yet.
+    /// Loader entry point. It loads and validates the animation manifest and builds the boss
+    /// definition (tuning, attacks, phases), then logs the result.
+    ///
+    /// It does NOT insert the boss into any scene yet: the target game version, the Managed
+    /// folder and the test location still have to be confirmed. Only the Modding API members
+    /// already used by the original skeleton appear here (Mod, Initialize, Log, GetVersion);
+    /// they must still be checked by compiling against the player's Modding.dll.
     /// </summary>
     public sealed class DoctorSimiBossMod : Mod
     {
-        public override string GetVersion() => "0.1.0-prototype";
+        public const string ManifestRelativePath = "Assets/animation_manifest.json";
+
+        /// <summary>Validated definition, or null if loading failed. Scene integration will use it.</summary>
+        public static BossDefinition Definition { get; private set; }
+
+        public override string GetVersion() => "0.2.0-prototype";
 
         public override void Initialize()
         {
             string modDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            string manifestPath = Path.Combine(modDirectory, "Assets", "animation_manifest.json");
+            string manifestPath = Path.Combine(modDirectory, ManifestRelativePath.Replace('/', Path.DirectorySeparatorChar));
 
-            if (!File.Exists(manifestPath))
+            BossDefinition definition;
+            try
             {
-                Log("Animation manifest not found: " + manifestPath);
+                definition = BossDefinition.Load(manifestPath, ManifestPaths.ForModDirectory(modDirectory));
+            }
+            catch (Exception e)
+            {
+                Log("Could not load " + manifestPath + ": " + e.Message);
                 return;
             }
 
-            string manifest = File.ReadAllText(manifestPath);
-            Log("Prototype animation manifest found (" + manifest.Length + " characters). " +
-                "No boss scene or runtime animation hook is connected yet.");
+            foreach (string line in definition.Report.ToLines()) Log(line);
+
+            if (!definition.CanRun)
+            {
+                Log("Boss definition has errors; the boss will not be available.");
+                return;
+            }
+
+            Definition = definition;
+            Log("Boss definition ready: " + definition.Manifest.Phases.Count + " phases, max health " +
+                definition.Tuning.MaxHealth + ". Scene insertion is not implemented yet.");
         }
     }
 }

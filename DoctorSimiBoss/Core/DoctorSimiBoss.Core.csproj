@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Engine-independent boss logic: manifest reading/validation, state machine, attack catalog and
+    animation selection. No references to Unity, Assembly-CSharp or Modding API, so it builds and
+    is unit-tested without a game installation. The mod project compiles these same sources into
+    its own DLL; this project exists for building and testing them on their own.
+  -->
+  <PropertyGroup>
+    <TargetFrameworks>net472;netstandard2.0</TargetFrameworks>
+    <RootNamespace>DoctorSimiBoss.Core</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>

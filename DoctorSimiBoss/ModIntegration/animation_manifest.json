@@ -11,6 +11,7 @@
     "y": 0.9,
     "note": "Provisional normalized pivot; calibrate in-game."
   },
+  "spriteFacing": "left",
   "animations": {
     "Spawn": {
       "loop": false,
@@ -115,7 +116,9 @@
   },
   "integrationNotes": [
     "Frame timing, scale, pivot, hitboxes, and damage frame are provisional.",
-    "This manifest is data only; it does not spawn or animate a boss in Hollow Knight."
+    "Read by DoctorSimiBoss.Core (AnimationManifestParser + ManifestValidator). The boss logic runs on it, but no scene insertion exists yet.",
+    "Specials without game-ready sprites (assetStatus concept-only/design-only) are animated with the Attack placeholder; non-attack states fall back to Idle.",
+    "Files under References/ are concept art only and must never be listed as frames."
   ],
   "encounterPhases": [
     {
@@ -126,7 +129,7 @@
       },
       "specials": [
         "SaludoCargado",
-        "PisonSimi"
+        "PisotonSimi"
       ],
       "name": "Turno de bienvenida"
     },
@@ -152,68 +155,171 @@
         "LluviaCapsulas",
         "AplausoSalida"
       ],
-      "name": "Ultima visita"
+      "name": "Ultima visita",
+      "includesPreviousSpecials": true
     }
   ],
   "plannedSpecials": [
     {
+      "id": "SaludoCargado",
+      "displayName": "Saludo cargado",
+      "phase": 1,
+      "animation": "SpecialPunch",
       "assetStatus": "concept-only",
       "frameCount": 6,
-      "animation": "SpecialPunch",
-      "phase": 1,
-      "id": "SaludoCargado",
       "conceptPoses": [
         1,
         2
-      ]
+      ],
+      "conceptSheet": "References/saludo_cargado_concept_sheet.png",
+      "prototypeTiming": {
+        "windup": 0.8,
+        "active": 0.2,
+        "recovery": 0.9
+      }
     },
     {
+      "id": "PisotonSimi",
+      "displayName": "Pisotón Simi",
+      "phase": 1,
+      "animation": "SpecialSlam",
       "assetStatus": "concept-only",
       "frameCount": 6,
-      "animation": "SpecialSlam",
-      "phase": 1,
-      "id": "PisonSimi",
       "conceptPoses": [
         3
-      ]
+      ],
+      "conceptSheet": "References/special_attacks_concept_sheet.png",
+      "prototypeTiming": {
+        "windup": 0.6,
+        "active": 0.4,
+        "recovery": 0.8
+      }
     },
     {
+      "id": "CarreraPasillo",
+      "displayName": "Carrera de pasillo",
+      "phase": 2,
+      "animation": "SpecialDash",
       "assetStatus": "concept-only",
       "frameCount": 6,
-      "animation": "SpecialDash",
-      "phase": 2,
-      "id": "CarreraPasillo",
       "conceptPoses": [
         4
-      ]
+      ],
+      "conceptSheet": "References/special_attacks_concept_sheet.png",
+      "prototypeTiming": {
+        "windup": 0.7,
+        "active": 1.0,
+        "recovery": 0.3,
+        "selfStunAfter": 1.2
+      }
     },
     {
+      "id": "GiroBotarga",
+      "displayName": "Giro de botarga",
+      "phase": 2,
+      "animation": "SpecialSpin",
       "assetStatus": "concept-only",
       "frameCount": 6,
-      "animation": "SpecialSpin",
-      "phase": 2,
-      "id": "GiroBotarga",
       "conceptPoses": [
         5
-      ]
+      ],
+      "conceptSheet": "References/special_attacks_concept_sheet.png",
+      "prototypeTiming": {
+        "windup": 0.6,
+        "active": 0.8,
+        "recovery": 0.8
+      }
     },
     {
+      "id": "LluviaCapsulas",
+      "displayName": "Lluvia de cápsulas",
+      "phase": 3,
+      "animation": "SpecialCapsules",
       "assetStatus": "design-only",
       "frameCount": 6,
-      "animation": "SpecialCapsules",
-      "phase": 3,
-      "id": "LluviaCapsulas",
-      "conceptPoses": []
+      "conceptPoses": [],
+      "conceptSheet": null,
+      "prototypeTiming": {
+        "windup": 1.0,
+        "active": 1.5,
+        "recovery": 1.0
+      }
     },
     {
+      "id": "AplausoSalida",
+      "displayName": "Aplauso de salida",
+      "phase": 3,
+      "animation": "SpecialWave",
       "assetStatus": "concept-only",
       "frameCount": 6,
-      "animation": "SpecialWave",
-      "phase": 3,
-      "id": "AplausoSalida",
       "conceptPoses": [
         6
-      ]
+      ],
+      "conceptSheet": "References/special_attacks_concept_sheet.png",
+      "prototypeTiming": {
+        "windup": 0.9,
+        "active": 2.1,
+        "recovery": 1.6
+      }
+    }
+  ],
+  "tuning": {
+    "note": "Prototype values in game world units; not final balance.",
+    "maxHealth": 900,
+    "moveSpeed": 4,
+    "attackRange": 3,
+    "idleBetweenActions": 0.8,
+    "moveDuration": 1.2,
+    "hurtDuration": 0.25,
+    "stunHitThreshold": 12,
+    "stunDuration": 2.5,
+    "phaseTransitionDuration": 1.5,
+    "specialChance": 0.45
+  },
+  "conceptReferences": [
+    {
+      "path": "References/attack_concept_sheet.png",
+      "note": "Concept sheet only; not a game sprite and not shipped with the mod."
+    },
+    {
+      "path": "References/defeat_concept_sheet.png",
+      "note": "Concept sheet only; not a game sprite and not shipped with the mod."
+    },
+    {
+      "path": "References/hurt_concept_sheet.png",
+      "note": "Concept sheet only; not a game sprite and not shipped with the mod."
+    },
+    {
+      "path": "References/idle_concept_sheet.png",
+      "note": "Concept sheet only; not a game sprite and not shipped with the mod."
+    },
+    {
+      "path": "References/punch_impact_concept_sheet.png",
+      "note": "Concept sheet only; not a game sprite and not shipped with the mod."
+    },
+    {
+      "path": "References/saludo_cargado_concept_sheet.png",
+      "note": "Concept sheet only; not a game sprite and not shipped with the mod."
+    },
+    {
+      "path": "References/spawn_concept_sheet.png",
+      "note": "Concept sheet only; not a game sprite and not shipped with the mod."
+    },
+    {
+      "path": "References/special_attacks_concept_sheet.png",
+      "note": "Concept sheet only; not a game sprite and not shipped with the mod."
+    },
+    {
+      "path": "References/stun_concept_sheet.png",
+      "note": "Concept sheet only; not a game sprite and not shipped with the mod."
+    },
+    {
+      "path": "References/walk_concept_sheet.png",
+      "note": "Concept sheet only; not a game sprite and not shipped with the mod."
+    },
+    {
+      "path": "References/plush_reference_photo.png",
+      "note": "Original reference photo provided by the user; never shipped with the mod."
     }
   ]
 }

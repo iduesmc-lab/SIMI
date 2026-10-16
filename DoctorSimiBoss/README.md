@@ -18,11 +18,11 @@ References/plush_reference_photo.png conserva la foto aportada. Las láminas con
 
 Todos los recursos son prototipos visuales. El tamaño de 128 × 128 px es provisional. Falta ajustar escala, punto de apoyo, hitboxes, tiempos y el cuadro activo del ataque dentro del juego.
 
-Este paquete no incluye código ejecutable del mod. Para integrarlo se necesita elegir el cargador y la versión objetivo; configurar animaciones, pivotes y colisiones; implementar estados e IA; y sincronizar PunchImpact con el golpe. Effects puede ampliarse con partículas de entrada, aterrizaje, daño y derrota.
+El paquete incluye ya la lógica del jefe y una entrada mínima del mod (ver más abajo), pero todavía no es jugable. Para integrarlo se necesita elegir el cargador y la versión objetivo; cargar las animaciones en Unity, configurar pivotes y colisiones, conectar la máquina de estados a una escena y sincronizar PunchImpact con el golpe. Effects puede ampliarse con partículas de entrada, aterrizaje, daño y derrota.
 
 ## Integración para Hollow Knight
 
-`ModIntegration/` incluye un proyecto C# inicial, un punto de entrada mínimo para el cargador y un manifiesto que enlaza las animaciones y el efecto de impacto. El proyecto copia los PNG como contenido al compilar. Es un esqueleto: no crea todavía un jefe dentro del juego; faltan la escena, el controlador de animación, la IA y los ajustes de colisión. Consulta `ModIntegration/README.md` antes de compilar.
+`Core/` contiene la lógica del jefe independiente del motor: lectura y validación del manifiesto, máquina de estados (Idle, movimiento, ataque, daño, aturdimiento, transición de fase y derrota), catálogo de ataques por fase y selección de animaciones con Idle y Attack como provisionales. Tiene pruebas en `Tests/`. `ModIntegration/` es el proyecto del mod: carga y valida el manifiesto y lo registra en el log. Aún no inserta al jefe en ninguna escena ni se ha compilado contra las DLL de una instalación real. Consulta `ModIntegration/README.md` para el estado, cómo compilar y los datos de instalación que faltan.
 
 El diseño de combate con tres fases y seis ataques especiales está en ModIntegration/CombatDesign.md; la hoja conceptual está en References/special_attacks_concept_sheet.png. Las animaciones especiales siguen pendientes de producir como sprites transparentes.
 

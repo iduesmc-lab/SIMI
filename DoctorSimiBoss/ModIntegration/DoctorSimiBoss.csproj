@@ -2,19 +2,37 @@
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <AssemblyTitle>DoctorSimiBoss</AssemblyTitle>
-    <AssemblyVersion>0.1.0.0</AssemblyVersion>
-    <FileVersion>0.1.0.0</FileVersion>
+    <AssemblyVersion>0.2.0.0</AssemblyVersion>
+    <FileVersion>0.2.0.0</FileVersion>
     <OutputPath>bin\$(Configuration)\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <LangVersion>latest</LangVersion>
     <HollowKnightRefs Condition="'$(HollowKnightRefs)' == ''">$(MSBuildThisFileDirectory)HollowKnightManaged\</HollowKnightRefs>
+    <!-- Separate property: values passed with -p: cannot be redefined inside the project. -->
+    <HollowKnightManagedDir>$([MSBuild]::EnsureTrailingSlash('$(HollowKnightRefs)'))</HollowKnightManagedDir>
   </PropertyGroup>
+
+  <!-- Engine-independent boss logic, compiled into this same DLL (see ../Core). -->
+  <ItemGroup>
+    <Compile Include="..\Core\**\*.cs" Exclude="..\Core\bin\**;..\Core\obj\**">
+      <Link>Core\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Compile>
+  </ItemGroup>
+
+  <!-- Game assemblies come from the player's own installation; they are never copied to the output. -->
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>$(HollowKnightRefs)Assembly-CSharp.dll</HintPath>
+      <HintPath>$(HollowKnightManagedDir)Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
     </Reference>
     <Reference Include="Modding">
-      <HintPath>$(HollowKnightRefs)Modding.dll</HintPath>
+      <HintPath>$(HollowKnightManagedDir)Modding.dll</HintPath>
+      <Private>false</Private>
     </Reference>
+  </ItemGroup>
+
+  <!-- Only game-ready sprites/effects are shipped. References/ (concept art) is deliberately excluded. -->
+  <ItemGroup>
     <Content Include="animation_manifest.json">
       <Link>Assets\animation_manifest.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -28,4 +46,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+
+  <Target Name="CheckHollowKnightRefs" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="!Exists('$(HollowKnightManagedDir)Assembly-CSharp.dll') Or !Exists('$(HollowKnightManagedDir)Modding.dll')"
+           Text="Assembly-CSharp.dll and Modding.dll were not found in '$(HollowKnightManagedDir)'. Copy your game's Managed folder to ModIntegration/HollowKnightManaged or pass -p:HollowKnightRefs=&lt;path to Managed&gt;" />
+  </Target>
 </Project>
