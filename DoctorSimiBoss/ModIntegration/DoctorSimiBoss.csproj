@@ -52,6 +52,26 @@
     </Content>
   </ItemGroup>
 
+  <!--
+    Release builds also produce bin/DoctorSimiBoss.zip for Lumafly's "Manually install" button.
+    Lumafly extracts a zip as-is into Mods/<zip name>/, so the zip is named DoctorSimiBoss.zip and has
+    DoctorSimiBoss.dll and Assets/ at its root (the API only loads Mods/<subfolder>/*.dll).
+  -->
+  <Target Name="PackageForLumafly" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+    <PropertyGroup>
+      <LumaflyStage>$(MSBuildThisFileDirectory)bin\LumaflyPackage\</LumaflyStage>
+      <LumaflyZip>$(MSBuildThisFileDirectory)bin\DoctorSimiBoss.zip</LumaflyZip>
+    </PropertyGroup>
+    <ItemGroup>
+      <LumaflyAssets Include="$(OutDir)Assets\**\*" />
+    </ItemGroup>
+    <RemoveDir Directories="$(LumaflyStage)" />
+    <Copy SourceFiles="$(OutDir)$(AssemblyName).dll" DestinationFolder="$(LumaflyStage)" />
+    <Copy SourceFiles="@(LumaflyAssets)" DestinationFiles="@(LumaflyAssets->'$(LumaflyStage)Assets\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <ZipDirectory SourceDirectory="$(LumaflyStage)" DestinationFile="$(LumaflyZip)" Overwrite="true" />
+    <Message Importance="high" Text="Lumafly package: $(LumaflyZip)" />
+  </Target>
+
   <Target Name="CheckHollowKnightRefs" BeforeTargets="ResolveAssemblyReferences">
     <Error Condition="!Exists('$(HollowKnightManagedDir)Assembly-CSharp.dll')"
            Text="Assembly-CSharp.dll was not found in '$(HollowKnightManagedDir)'. Copy your game's Managed folder to ModIntegration/HollowKnightManaged or pass -p:HollowKnightRefs=&lt;path to Managed&gt;" />

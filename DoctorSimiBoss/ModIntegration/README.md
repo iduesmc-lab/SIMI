@@ -85,14 +85,13 @@ Mod (requiere la Modding API instalada en tu juego):
    ```
    También puedes copiar `Managed` a `ModIntegration/HollowKnightManaged/` (está en `.gitignore`: las DLL del juego no se suben al repositorio).
 3. No existe un `Modding.dll` separado: en la API para 1.5 los tipos `Modding` van dentro del `Assembly-CSharp.dll` parcheado. Si ves *"The type or namespace name 'Modding' could not be found"*, ese `Assembly-CSharp.dll` es el original sin API.
-4. El resultado queda en `ModIntegration/bin/Release/`: `DoctorSimiBoss.dll` y `Assets/` (manifiesto, `Sprites/`, `Effects/`).
-   Las DLL del juego no se copian a la salida y `References/` nunca se empaqueta.
-5. Copia el **contenido** de `bin/Release/` a una subcarpeta propia dentro de `Mods`:
+4. El resultado queda en `ModIntegration/bin/Release/` (`DoctorSimiBoss.dll` y `Assets/`). La compilación en Release también genera **`ModIntegration/bin/DoctorSimiBoss.zip`** para Lumafly. Las DLL del juego no se copian a la salida y `References/` nunca se empaqueta.
+5. **Instalar con Lumafly:** botón **Manually install** → elige `DoctorSimiBoss.zip`. Lumafly extrae el ZIP tal cual en `Mods\<nombre del zip>\`, así que el archivo debe llamarse exactamente `DoctorSimiBoss.zip` y llevar `DoctorSimiBoss.dll` y `Assets\` en la raíz, sin carpeta intermedia. El resultado debe ser:
    ```
    ...\hollow_knight_Data\Managed\Mods\DoctorSimiBoss\DoctorSimiBoss.dll
    ...\hollow_knight_Data\Managed\Mods\DoctorSimiBoss\Assets\...
    ```
-   La API v77 solo busca DLL en `Mods\<subcarpeta>\*.dll`: una DLL suelta en `Mods\` no se carga, y la carpeta `Mods\Disabled` se ignora.
+   La API v77 solo busca DLL en `Mods\<subcarpeta>\*.dll`: una DLL suelta en `Mods\` o dos niveles más abajo no se carga, y `Mods\Disabled` se ignora. Sin Lumafly, descomprime el ZIP en `Mods\DoctorSimiBoss\` a mano.
 6. Abre el juego y luego revisa `ModLog.txt` en `%USERPROFILE%\AppData\LocalLow\Team Cherry\Hollow Knight\` (la API lo escribe en `Application.persistentDataPath`; los anteriores pasan a `Old ModLogs`). Si el mod cargó, verás una línea por clip y por especial, `Boss definition ready` y las medidas de la arena.
 
 Lo que usa `DoctorSimiBossMod.cs` de la API (`Mod`, `Initialize()`, `GetVersion()`, `Log(string)`) se comprobó contra el código fuente público de ModdingAPI 1.5.78.11833-77, todavía no compilando contra tu DLL.
@@ -107,14 +106,14 @@ Pasos:
 
 1. Steam → clic derecho en Hollow Knight → **Propiedades** → **Versiones del juego y betas** → elige **1.5.78.11833 - Previous version**. Espera a que se descargue.
 2. Comprueba que el menú principal muestre `1.5.78.11833`.
-3. Abre Scarab → **Enable API**. Si no aparece o falla, usa la flechita junto a *Enable/Disable API* para reinstalarla.
+3. Abre Lumafly y comprueba que la API esté activada (botón **Toggle API**: debe estar en modo con mods). Lumafly descarga la Modding API si falta.
 4. Arranca el juego una vez: en el menú debería aparecer el texto de la Modding API.
 
 Si cambias de versión, guarda una copia de tus partidas antes (`%AppData%\..\LocalLow\Team Cherry\Hollow Knight`).
 
 ## Decisiones del primer encuentro de prueba
 
-- Plataforma: **Steam en Windows**, mods instalados con **Scarab**.
+- Plataforma: **Steam en Windows**, mods gestionados con **Lumafly** (antes Scarab; ambos instalan la misma Modding API).
 - Acceso: **tecla de prueba** en cualquier sala que lleva a la arena (`encounter.access = "debugKey"`). La tecla aún no está elegida (`debugKey: null`).
 - Entrada: el jefe **salta y aterriza** con Spawn en `bossLandingX`.
 - Arena: **tu imagen como fondo** de una sala sencilla con suelo y paredes invisibles, sin escena nueva de Unity.
@@ -123,7 +122,7 @@ Si cambias de versión, guarda una copia de tus partidas antes (`%AppData%\..\Lo
 
 1. ~~Plataforma y tienda~~: Windows + Steam (confirmado).
 2. ~~Versión de Hollow Knight~~: 1.5.12620, sin API compatible; hay que bajar a 1.5.78.11833 (ver *Versión del juego*).
-3. **Versión de la Modding API** que instaló Scarab (en Scarab aparece como *Modding API* / *API*).
+3. ~~Versión de la Modding API~~: v77 (1.5.78.11833-77), la que trae Scarab/Lumafly.
 4. ~~Ruta de `Managed`~~: `D:\SteamLibrary\steamapps\common\Hollow Knight\hollow_knight_Data\Managed` (confirmada). No hace falta `Modding.dll`.
 5. **Carpeta de mods**: se espera `...\Managed\Mods`. Se confirmará cuando Scarab instale la API.
 6. ~~Dónde probar al jefe~~: arena propia a partir de tu imagen, con tecla de prueba (confirmado). Falta elegir **qué tecla**.
