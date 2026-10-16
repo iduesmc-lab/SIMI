@@ -281,10 +281,12 @@ namespace DoctorSimiBoss.Core.Tests
         [Fact]
         public void PhasesOfferTheDesignedSpecials()
         {
+            // Each phase adds new attacks and keeps the earlier ones (includesPreviousSpecials on phases 2 and 3).
             Assert.Equal(new[] { "SaludoCargado", "PisotonSimi" }, _def.Attacks.SpecialsForPhase(1).Select(a => a.Id));
-            Assert.Equal(new[] { "CarreraPasillo", "GiroBotarga" }, _def.Attacks.SpecialsForPhase(2).Select(a => a.Id));
-            // Phase 3 mixes earlier patterns with its own (includesPreviousSpecials).
-            Assert.Equal(new[] { "SaludoCargado", "PisotonSimi", "CarreraPasillo", "GiroBotarga", "LluviaCapsulas", "AplausoSalida" },
+            Assert.Equal(new[] { "SaludoCargado", "PisotonSimi", "CarreraPasillo", "GiroBotarga", "JeringasGuiadas" },
+                         _def.Attacks.SpecialsForPhase(2).Select(a => a.Id));
+            Assert.Equal(new[] { "SaludoCargado", "PisotonSimi", "CarreraPasillo", "GiroBotarga", "JeringasGuiadas",
+                                 "LluviaCapsulas", "AplausoSalida", "EspiralVendas" },
                          _def.Attacks.SpecialsForPhase(3).Select(a => a.Id));
         }
 

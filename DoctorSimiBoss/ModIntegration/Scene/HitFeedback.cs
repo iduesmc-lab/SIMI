@@ -86,6 +86,8 @@ namespace DoctorSimiBoss.Scene
         private SpriteRenderer _source;
         private SpriteRenderer _overlay;
         private float _timer;
+        private Color _glow;
+        private float _glowAlpha;
 
         public static WhiteFlash Create(SpriteRenderer source)
         {
@@ -101,17 +103,27 @@ namespace DoctorSimiBoss.Scene
 
         public void Flash() { _timer = Duration; }
 
+        /// <summary>Continuous coloured glow (attack telegraph); alpha 0 turns it off. The hit flash wins while active.</summary>
+        public void SetGlow(Color color, float alpha) { _glow = color; _glowAlpha = alpha; }
+
         private void LateUpdate()
         {
-            if (_timer <= 0f) { if (_overlay.enabled) _overlay.enabled = false; return; }
-            _timer -= Time.deltaTime;
             var sprite = _source.sprite;
-            if (sprite == null) return;
+            bool flashing = _timer > 0f;
+            if ((!flashing && _glowAlpha <= 0f) || sprite == null) { if (_overlay.enabled) _overlay.enabled = false; return; }
             _overlay.enabled = true;
             _overlay.sprite = WhiteOf(sprite);
             _overlay.flipX = _source.flipX;
-            float t = Mathf.Clamp01(_timer / Duration);
-            _overlay.color = new Color(1f, 1f, 1f, 0.9f * t);
+            if (flashing)
+            {
+                _timer -= Time.deltaTime;
+                float t = Mathf.Clamp01(_timer / Duration);
+                _overlay.color = new Color(1f, 1f, 1f, 0.9f * t);
+            }
+            else
+            {
+                _overlay.color = new Color(_glow.r, _glow.g, _glow.b, _glowAlpha);
+            }
         }
 
         private static Sprite WhiteOf(Sprite sprite)

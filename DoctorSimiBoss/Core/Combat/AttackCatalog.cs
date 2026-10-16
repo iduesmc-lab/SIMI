@@ -179,6 +179,10 @@ namespace DoctorSimiBoss.Core.Combat
                     Set(a, 1.0f, 1.5f, 1.0f); a.Ranged = true; break;
                 case "AplausoSalida": // three ground pulses, long punish window after the third
                     Set(a, 0.9f, 2.1f, 1.6f); a.Ranged = true; break;
+                case "JeringasGuiadas": // three syringes that home in for a moment, then fly straight
+                    Set(a, 0.7f, 0.6f, 0.9f); a.Ranged = true; break;
+                case "EspiralVendas": // rotating spiral of bandages from the boss, Cuphead style
+                    Set(a, 0.8f, 2.0f, 1.2f); a.Ranged = true; break;
                 default:
                     Set(a, 0.7f, 0.4f, 0.8f); break;
             }

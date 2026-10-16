@@ -359,7 +359,8 @@
         "SaludoCargado",
         "PisotonSimi"
       ],
-      "name": "Turno de bienvenida"
+      "name": "Turno de bienvenida",
+      "includesPreviousSpecials": false
     },
     {
       "id": 2,
@@ -369,9 +370,11 @@
       },
       "specials": [
         "CarreraPasillo",
-        "GiroBotarga"
+        "GiroBotarga",
+        "JeringasGuiadas"
       ],
-      "name": "Ronda express"
+      "name": "Ronda express",
+      "includesPreviousSpecials": true
     },
     {
       "id": 3,
@@ -381,7 +384,8 @@
       },
       "specials": [
         "LluviaCapsulas",
-        "AplausoSalida"
+        "AplausoSalida",
+        "EspiralVendas"
       ],
       "name": "Ultima visita",
       "includesPreviousSpecials": true
@@ -501,6 +505,40 @@
       },
       "placeholderAnimation": "Attack",
       "sourceSheet": "Art/AI_Sheets/DoctorSimi_SpecialWave.png"
+    },
+    {
+      "id": "JeringasGuiadas",
+      "displayName": "Jeringas guiadas",
+      "phase": 2,
+      "animation": "SpecialSyringes",
+      "assetStatus": "design-only",
+      "frameCount": 6,
+      "conceptPoses": [],
+      "conceptSheet": null,
+      "prototypeTiming": {
+        "windup": 0.7,
+        "active": 0.6,
+        "recovery": 0.9
+      },
+      "placeholderAnimation": "SpecialPunch",
+      "sourceSheet": null
+    },
+    {
+      "id": "EspiralVendas",
+      "displayName": "Espiral de vendas",
+      "phase": 3,
+      "animation": "SpecialBandages",
+      "assetStatus": "design-only",
+      "frameCount": 6,
+      "conceptPoses": [],
+      "conceptSheet": null,
+      "prototypeTiming": {
+        "windup": 0.8,
+        "active": 2.0,
+        "recovery": 1.2
+      },
+      "placeholderAnimation": "SpecialSpin",
+      "sourceSheet": null
     }
   ],
   "tuning": {

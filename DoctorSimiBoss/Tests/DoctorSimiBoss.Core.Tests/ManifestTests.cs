@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using DoctorSimiBoss.Core.Json;
+using DoctorSimiBoss.Core.Animation;
+using DoctorSimiBoss.Core.Combat;
 using DoctorSimiBoss.Core.Manifest;
 using Xunit;
 
@@ -56,11 +58,12 @@ namespace DoctorSimiBoss.Core.Tests
 
             Assert.Equal(new[] { "Turno de bienvenida", "Ronda express", "Ultima visita" }, m.Phases.Select(p => p.Name).ToArray());
             Assert.Equal(new[] { "SaludoCargado", "PisotonSimi" }, m.Phases[0].Specials);
-            Assert.Equal(new[] { "CarreraPasillo", "GiroBotarga" }, m.Phases[1].Specials);
-            Assert.Equal(new[] { "LluviaCapsulas", "AplausoSalida" }, m.Phases[2].Specials);
+            Assert.Equal(new[] { "CarreraPasillo", "GiroBotarga", "JeringasGuiadas" }, m.Phases[1].Specials);
+            Assert.Equal(new[] { "LluviaCapsulas", "AplausoSalida", "EspiralVendas" }, m.Phases[2].Specials);
 
-            Assert.Equal(6, m.PlannedSpecials.Count);
-            Assert.All(m.PlannedSpecials, s => Assert.Equal(AssetStatus.Ready, s.AssetStatus));
+            Assert.Equal(8, m.PlannedSpecials.Count);
+            Assert.All(m.PlannedSpecials.Take(6), s => Assert.Equal(AssetStatus.Ready, s.AssetStatus));
+            Assert.All(m.PlannedSpecials.Skip(6), s => Assert.Equal(AssetStatus.DesignOnly, s.AssetStatus));
             Assert.Equal(1300, m.Tuning.MaxHealth);
             Assert.Contains(m.ConceptReferences, c => c.Path == "References/special_attacks_concept_sheet.png");
         }
@@ -81,11 +84,11 @@ namespace DoctorSimiBoss.Core.Tests
         }
 
         [Fact]
-        public void AllSpecialsUseTheirOwnHdAnimation()
+        public void DrawnSpecialsUseTheirOwnHdAnimation()
         {
             var report = TestSupport.LoadRealDefinition().Report;
-            Assert.Equal(6, report.Specials.Count);
-            Assert.All(report.Specials, s =>
+            Assert.Equal(8, report.Specials.Count);
+            Assert.All(report.Specials.Take(6), s =>
             {
                 Assert.True(s.HasPlayableAnimation, s.Id);
                 Assert.Equal(s.PlannedAnimation, s.AnimationUsed);
@@ -93,15 +96,28 @@ namespace DoctorSimiBoss.Core.Tests
         }
 
         [Fact]
-        public void WithoutSpecialSpritesEverySpecialFallsBackToAttack()
+        public void NewSpecialsUseTheirPlaceholderClipsUntilDrawn()
         {
-            var report = TestSupport.WithoutSpecialSprites().Report;
+            var def = TestSupport.LoadRealDefinition();
+            var resolver = def.CreateAnimationResolver(PlaceholderPolicy.PreferAvailable);
+            Assert.Equal("SpecialPunch", resolver.Resolve(BossState.Attack, def.Attacks.Get("JeringasGuiadas")).Clip);
+            Assert.Equal("SpecialSpin", resolver.Resolve(BossState.Attack, def.Attacks.Get("EspiralVendas")).Clip);
+        }
+
+        [Fact]
+        public void WithoutSpecialSpritesEverySpecialReportsItsPlaceholder()
+        {
+            var (m, report, _) = TestSupport.WithoutSpecialSprites();
             Assert.Empty(report.Errors);
             Assert.All(report.Specials, s =>
             {
                 Assert.False(s.HasPlayableAnimation);
-                Assert.Equal("Attack", s.AnimationUsed);
+                var planned = m.PlannedSpecials.Single(p => p.Id == s.Id);
+                string expected = planned.PlaceholderAnimation != null && report.IsPlayable(planned.PlaceholderAnimation)
+                    ? planned.PlaceholderAnimation : "Attack";
+                Assert.Equal(expected, s.AnimationUsed);
             });
+            Assert.Equal("Spawn", report.Specials.Single(s => s.Id == "PisotonSimi").AnimationUsed);
         }
 
         [Fact]

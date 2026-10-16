@@ -8,7 +8,7 @@ namespace DoctorSimiBoss.Scene
     /// </summary>
     internal static class ProceduralSprites
     {
-        private static Sprite _wave, _capsule, _warning;
+        private static Sprite _wave, _capsule, _warning, _syringe, _bandage;
 
         public static Sprite Wave => _wave ?? (_wave = Build(64, 32, 64f, new Vector2(0.5f, 0f), (x, y, w, h) =>
         {
@@ -32,6 +32,32 @@ namespace DoctorSimiBoss.Scene
             var baseColor = top ? new Color(0.85f, 0.18f, 0.2f) : new Color(0.95f, 0.93f, 0.88f);
             float shine = dx < -r * 0.3f ? 0.15f : 0f;
             return new Color(Mathf.Min(1, baseColor.r + shine), Mathf.Min(1, baseColor.g + shine), Mathf.Min(1, baseColor.b + shine), 1f);
+        }));
+
+        /// <summary>Fantasy syringe pointing right: plunger, glass barrel with glowing liquid, needle. No markings.</summary>
+        public static Sprite Syringe => _syringe ?? (_syringe = Build(56, 16, 48f, new Vector2(0.5f, 0.5f), (x, y, w, h) =>
+        {
+            float cy = (h - 1) / 2f, dy = Mathf.Abs(y - cy);
+            if (x < 6) return dy <= 6 ? new Color(0.25f, 0.27f, 0.32f, 1f) : Color.clear;          // plunger head
+            if (x < 10) return dy <= 1.5f ? new Color(0.3f, 0.3f, 0.35f, 1f) : Color.clear;         // rod
+            if (x < 40)                                                                               // barrel
+            {
+                if (dy > 5f) return Color.clear;
+                if (dy > 4f) return new Color(0.85f, 0.9f, 0.95f, 1f);
+                return x > 18 ? new Color(0.35f, 0.95f, 0.6f, 0.95f) : new Color(0.8f, 0.9f, 1f, 0.35f);
+            }
+            if (x < 43) return dy <= 3f ? new Color(0.6f, 0.62f, 0.68f, 1f) : Color.clear;          // hub
+            return dy <= 0.8f ? new Color(0.85f, 0.88f, 0.92f, 1f) : Color.clear;                   // needle
+        }));
+
+        /// <summary>Short strip of rolled bandage.</summary>
+        public static Sprite Bandage => _bandage ?? (_bandage = Build(36, 14, 40f, new Vector2(0.5f, 0.5f), (x, y, w, h) =>
+        {
+            float cy = (h - 1) / 2f, dy = Mathf.Abs(y - cy);
+            if (dy > 5.5f) return Color.clear;
+            if (dy > 4.5f) return new Color(0.35f, 0.3f, 0.28f, 1f);
+            bool stripe = (x / 5) % 2 == 0;
+            return stripe ? new Color(0.93f, 0.9f, 0.82f, 1f) : new Color(0.84f, 0.8f, 0.72f, 1f);
         }));
 
         public static Sprite Warning => _warning ?? (_warning = Build(8, 64, 64f, new Vector2(0.5f, 0f), (x, y, w, h) =>
@@ -65,6 +91,14 @@ namespace DoctorSimiBoss.Scene
         public float Gravity;
         /// <summary>Rotation speed in degrees per second (tumbling capsules).</summary>
         public float Spin;
+
+        /// <summary>When set, the hazard steers towards this target for <see cref="HomingTime"/> seconds.</summary>
+        public Transform HomingTarget;
+        public float HomingTime;
+        /// <summary>Maximum turn in degrees per second while homing.</summary>
+        public float TurnRate = 150f;
+        /// <summary>Keep the sprite pointing along its flight direction (sprite drawn pointing right).</summary>
+        public bool FaceVelocity;
 
         /// <param name="frames">Animated sprites (looped at <paramref name="fps"/>); a single frame is a still sprite.</param>
         /// <param name="colliderSize">Collider in the object's local units (before scale and rotation).</param>
@@ -112,6 +146,18 @@ namespace DoctorSimiBoss.Scene
             float dt = Time.deltaTime;
             _life -= dt;
             _velocity.y -= Gravity * dt;
+            if (HomingTarget != null && HomingTime > 0f)
+            {
+                HomingTime -= dt;
+                Vector2 to = (Vector2)(HomingTarget.position - transform.position);
+                float speed = _velocity.magnitude;
+                float current = Mathf.Atan2(_velocity.y, _velocity.x) * Mathf.Rad2Deg;
+                float wanted = Mathf.Atan2(to.y, to.x) * Mathf.Rad2Deg;
+                float angle = Mathf.MoveTowardsAngle(current, wanted, TurnRate * dt) * Mathf.Deg2Rad;
+                _velocity = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * speed;
+            }
+            if (FaceVelocity && _velocity.sqrMagnitude > 0.01f)
+                transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(_velocity.y, _velocity.x) * Mathf.Rad2Deg);
             if (Spin != 0f) transform.Rotate(0f, 0f, Spin * dt);
             var p = transform.position + (Vector3)(_velocity * dt);
             transform.position = p;

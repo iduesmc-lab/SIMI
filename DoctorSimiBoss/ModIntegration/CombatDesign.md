@@ -56,3 +56,14 @@ El Caballero pelea a distancia corta y esquivando, así que los puñetazos direc
 - **Saludo cargado**: tras cargar, dispara un abanico de tres cápsulas rectas dirigidas al Caballero. Ya no embiste con el puño.
 - **Carrera de pasillo** (embestida), Pisotón, Giro, Lluvia de cápsulas y Aplauso no cambian. El daño por contacto con su cuerpo se mantiene.
 - No hay caja de daño en el puño: `hitboxes.punch` solo marca desde dónde salen los proyectiles.
+
+## Fases y ataques nuevos (v0.8.0)
+
+| Fase | Especiales disponibles |
+|---|---|
+| 1. Turno de bienvenida | Saludo cargado, Pisotón Simi |
+| 2. Ronda express | Lo anterior + Carrera de pasillo, Giro de botarga, **Jeringas guiadas** |
+| 3. Última visita | Todo lo anterior + Lluvia de cápsulas, Aplauso de salida, **Espiral de vendas** |
+
+- **Jeringas guiadas:** tres jeringas que salen hacia arriba, siguen al Caballero alrededor de un segundo y después vuelan en línea recta. Se esquivan cambiando de dirección en el último momento.
+- **Espiral de vendas:** tres brazos de vendas que giran desde el jefe durante dos segundos. Hay que colocarse entre los brazos y acompañar el giro.

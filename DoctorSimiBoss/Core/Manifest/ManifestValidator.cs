@@ -289,7 +289,9 @@ namespace DoctorSimiBoss.Core.Manifest
                     AssetStatus = special.AssetStatus,
                     PlannedAnimation = special.Animation,
                     HasPlayableAnimation = playable,
-                    AnimationUsed = playable ? special.Animation : AttackPlaceholder,
+                    AnimationUsed = playable ? special.Animation
+                        : special.PlaceholderAnimation != null && report.IsPlayable(special.PlaceholderAnimation) ? special.PlaceholderAnimation
+                        : AttackPlaceholder,
                 });
             }
         }

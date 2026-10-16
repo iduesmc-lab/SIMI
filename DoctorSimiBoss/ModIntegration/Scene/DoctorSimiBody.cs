@@ -132,7 +132,12 @@ namespace DoctorSimiBoss.Scene
                                      : "No enemy hit effects found yet (visit a room with normal enemies first); using the white flash only.");
 
             var machine = definition.CreateStateMachine(new DefaultBossBrain(new System.Random()));
-            machine.PhaseChanged += (from, to) => _log("Phase " + from + " -> " + to + " (" + machine.Health + "/" + machine.MaxHealth + ")");
+            machine.PhaseChanged += (from, to) =>
+            {
+                _log("Phase " + from + " -> " + to + " (" + machine.Health + "/" + machine.MaxHealth + ")");
+                CameraFx.Freeze(0.2f, _log);
+                CameraFx.Shake(CameraFx.Strength.Big, _log);
+            };
             machine.AttackStageChanged += OnAttackStage;
             _driver = new BossDriver(machine, definition.CreateAnimationResolver(PlaceholderPolicy.PreferAvailable), this);
         }
@@ -184,6 +189,7 @@ namespace DoctorSimiBoss.Scene
                 {
                     EndArc();
                     _motion.Land(_arc.Slam ? 1.4f : 0.9f);
+                    CameraFx.Shake(_arc.Slam ? CameraFx.Strength.Average : CameraFx.Strength.Small, _log);
                 }
             }
             else
@@ -204,15 +210,17 @@ namespace DoctorSimiBoss.Scene
 
         private void UpdateTint(float dt)
         {
+            _renderer.color = Color.white;
             if (_stage == AttackStage.Windup && _stageAttack != null && _stageAttack.IsSpecial)
             {
-                // Telegraph: the reflective bands "light up" before a special.
-                float pulse = 0.5f + 0.5f * Mathf.Sin(_clock * 28f);
-                var glow = _stageAttack.Id == "SaludoCargado" ? new Color(1f, 0.45f, 0.35f) : new Color(1f, 0.9f, 0.35f);
-                _renderer.color = Color.Lerp(Color.white, glow, pulse);
+                // Telegraph: a bright pulsing glow over the whole sprite (brightens, unlike a colour tint).
+                float pulse = 0.5f + 0.5f * Mathf.Sin(_clock * 24f);
+                var glow = _stageAttack.Id == "SaludoCargado" || _stageAttack.Id == "JeringasGuiadas"
+                    ? new Color(1f, 0.4f, 0.3f) : new Color(1f, 0.85f, 0.3f);
+                _whiteFlash.SetGlow(glow, 0.2f + 0.4f * pulse);
                 return;
             }
-            _renderer.color = Color.white;
+            _whiteFlash.SetGlow(Color.clear, 0f);
         }
 
         // ---- Choreography ----
@@ -262,6 +270,28 @@ namespace DoctorSimiBoss.Scene
                         float second = attack.Active * 0.5f;
                         // Warnings appear 0.55 s before the second wave lands, with a new safe lane.
                         At(second - 0.55f, () => PlanCapsuleWave(0f, 0.55f));
+                    }
+                    break;
+
+                case "JeringasGuiadas":
+                    if (stage == AttackStage.Active)
+                        for (int i = 0; i < 3; i++)
+                        {
+                            int n = i;
+                            At(n * 0.2f, () => FireSyringe(n));
+                        }
+                    break;
+
+                case "EspiralVendas":
+                    if (stage == AttackStage.Active)
+                    {
+                        const float every = 0.12f;
+                        int bursts = Mathf.Max(1, (int)(attack.Active / every));
+                        for (int i = 0; i < bursts; i++)
+                        {
+                            int n = i;
+                            At(n * every, () => BandageBurst(n * 17f));
+                        }
                     }
                     break;
 
@@ -443,6 +473,41 @@ namespace DoctorSimiBoss.Scene
             }
         }
 
+        /// <summary>Syringe that leaves the hand upwards-forwards, homes in for about a second, then flies straight.</summary>
+        private void FireSyringe(int index)
+        {
+            var hero = HeroController.instance;
+            var start = HandPosition() + new Vector3(0f, 0.6f * index, 0f);
+            float angle = (_facing > 0 ? 40f : 140f) + (index - 1) * 15f;
+            var dir = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
+            var art = _sprites.Get("Syringe");
+            var hazard = Hazard.Spawn(transform.parent, "Syringe", art ?? new[] { ProceduralSprites.Syringe }, 10f, false, angle, start,
+                                      Vector2.one, new Vector2(1.0f, 0.25f), Vector2.zero, dir * 11f, 5f,
+                                      _layers.EnemyDamage, _definition.Tuning.AttackDamage, LeftWall - 0.5f, RightWall + 0.5f, Floor, true,
+                                      p => SpawnEffect("PunchImpact", p + new Vector3(0f, 0.2f, 0f), false, 0.5f));
+            hazard.FaceVelocity = true;
+            hazard.HomingTarget = hero != null ? hero.transform : null;
+            hazard.HomingTime = 1.0f;
+            hazard.TurnRate = 160f;
+        }
+
+        /// <summary>One burst of the bandage spiral: three arms 120° apart, rotated a bit more each burst.</summary>
+        private void BandageBurst(float baseAngle)
+        {
+            var art = _sprites.Get("Bandage");
+            var center = transform.position + new Vector3(0f, 1.8f * transform.localScale.y, 0f);
+            for (int arm = 0; arm < 3; arm++)
+            {
+                float angle = baseAngle + arm * 120f;
+                var dir = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
+                var hazard = Hazard.Spawn(transform.parent, "Bandage", art ?? new[] { ProceduralSprites.Bandage }, 10f, false, angle,
+                                          center + (Vector3)(dir * 0.8f), Vector2.one, new Vector2(0.8f, 0.3f), Vector2.zero,
+                                          dir * 7.5f, 4f, _layers.EnemyDamage, _definition.Tuning.AttackDamage,
+                                          LeftWall - 0.5f, RightWall + 0.5f, Floor, true);
+                hazard.Spin = 360f;
+            }
+        }
+
         private void DropCapsule(float x)
         {
             var art = _sprites.Get("Capsule");
@@ -483,7 +548,12 @@ namespace DoctorSimiBoss.Scene
             if (_hitEffects != null) _hitEffects.RecieveHitEffect(damageInstance.GetActualDirection(transform));
             if (damageInstance.AttackType == AttackTypes.Nail && HeroController.instance != null)
                 HeroController.instance.SoulGain();
-            if (result == HitResult.Stunned) _log("Stunned (" + _driver.Machine.Health + "/" + _driver.Machine.MaxHealth + ")");
+            if (result == HitResult.Stunned)
+            {
+                _log("Stunned (" + _driver.Machine.Health + "/" + _driver.Machine.MaxHealth + ")");
+                CameraFx.Freeze(0.08f, _log);
+                CameraFx.Shake(CameraFx.Strength.Average, _log);
+            }
             if (result == HitResult.Stunned || result == HitResult.PhaseChanged || result == HitResult.Defeated)
             {
                 _schedule.Clear();
@@ -531,6 +601,8 @@ namespace DoctorSimiBoss.Scene
 
         public void OnDefeated()
         {
+            CameraFx.Freeze(0.35f, _log);
+            CameraFx.Shake(CameraFx.Strength.Big, _log);
             _contact.SetActive(false);
             _schedule.Clear();
             EndArc();
