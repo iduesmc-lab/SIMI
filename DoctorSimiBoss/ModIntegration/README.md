@@ -87,7 +87,15 @@ Mod (requiere la Modding API instalada en tu juego):
 3. No existe un `Modding.dll` separado: en la API para 1.5 los tipos `Modding` van dentro del `Assembly-CSharp.dll` parcheado. Si ves *"The type or namespace name 'Modding' could not be found"*, ese `Assembly-CSharp.dll` es el original sin API.
 4. El resultado queda en `ModIntegration/bin/Release/`: `DoctorSimiBoss.dll` y `Assets/` (manifiesto, `Sprites/`, `Effects/`).
    Las DLL del juego no se copian a la salida y `References/` nunca se empaqueta.
-5. Copia esos archivos a la carpeta de mods de tu instalación. Si el cargador lo reconoce, el log debería mostrar una línea por clip y por especial, y `Boss definition ready`.
+5. Copia el **contenido** de `bin/Release/` a una subcarpeta propia dentro de `Mods`:
+   ```
+   ...\hollow_knight_Data\Managed\Mods\DoctorSimiBoss\DoctorSimiBoss.dll
+   ...\hollow_knight_Data\Managed\Mods\DoctorSimiBoss\Assets\...
+   ```
+   La API v77 solo busca DLL en `Mods\<subcarpeta>\*.dll`: una DLL suelta en `Mods\` no se carga, y la carpeta `Mods\Disabled` se ignora.
+6. Abre el juego y luego revisa `ModLog.txt` en `%USERPROFILE%\AppData\LocalLow\Team Cherry\Hollow Knight\` (la API lo escribe en `Application.persistentDataPath`; los anteriores pasan a `Old ModLogs`). Si el mod cargó, verás una línea por clip y por especial, `Boss definition ready` y las medidas de la arena.
+
+Lo que usa `DoctorSimiBossMod.cs` de la API (`Mod`, `Initialize()`, `GetVersion()`, `Log(string)`) se comprobó contra el código fuente público de ModdingAPI 1.5.78.11833-77, todavía no compilando contra tu DLL.
 
 Si faltan las DLL, la compilación se detiene con un mensaje que indica la ruta buscada.
 

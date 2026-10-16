@@ -11,10 +11,13 @@ namespace DoctorSimiBoss
     /// Loader entry point. It loads and validates the animation manifest and builds the boss
     /// definition (tuning, attacks, phases), then logs the result.
     ///
-    /// It does NOT insert the boss into any scene yet: the target game version, the Managed
-    /// folder and the test location still have to be confirmed. Only the Modding API members
-    /// already used by the original skeleton appear here (Mod, Initialize, Log, GetVersion);
-    /// they must still be checked by compiling against the player's API-patched Assembly-CSharp.dll.
+    /// It does NOT insert the boss into any scene yet.
+    ///
+    /// Modding API members used here, checked against the public source of ModdingAPI
+    /// 1.5.78.11833-77 (not yet compiled against the player's own Assembly-CSharp.dll):
+    /// Mod (abstract, Loggable), virtual Initialize(), virtual GetVersion(), Loggable.Log(string).
+    /// The loader scans Managed/Mods/&lt;subfolder&gt;/*.dll, so this DLL must live in its own
+    /// subfolder with Assets/ beside it.
     /// </summary>
     public sealed class DoctorSimiBossMod : Mod
     {
