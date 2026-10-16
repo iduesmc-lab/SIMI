@@ -6,7 +6,7 @@
 |---|---|
 | Lógica del jefe (`../Core`) | Implementada y con pruebas unitarias (60) en .NET 8. Compila para `net472` y `netstandard2.0` sin dependencias del juego. |
 | Lectura y validación del manifiesto | Implementada. Comprueba que existan los 48 cuadros, que sean PNG de 128 × 128, que las fases sean coherentes y que no se use arte conceptual como sprite. |
-| Entrada del mod (`DoctorSimiBossMod.cs`) | Carga y valida el manifiesto y lo escribe en el log. **No se ha compilado contra tu `Assembly-CSharp.dll` real** (con la Modding API aplicada). Solo se comprobó su sintaxis y el empaquetado con stubs falsos. |
+| Entrada del mod (`DoctorSimiBossMod.cs`) | Carga y valida el manifiesto y lo escribe en el log. **Compila sin errores ni avisos** contra el `Assembly-CSharp.dll` de ModdingAPI v77 publicado (`moddingapi.v77.windows.zip`, misma fecha y tamaño que el instalado por Scarab). Las 250 referencias a `mscorlib` existen en el `mscorlib.dll` del juego. **Aún no se ha ejecutado dentro del juego.** |
 | Arena | Tu imagen está en `../Arena/` con suelo, paredes y puntos de entrada medidos (provisionales). Se valida y se empaqueta. |
 | Inserción en una escena | **No implementada.** Faltan la versión del juego y la ruta de `Managed` (ver abajo). |
 | Jugable en Hollow Knight | **No.** Todavía no hay objeto del jefe en el juego, ni sprites cargados en Unity, ni colisiones. |
