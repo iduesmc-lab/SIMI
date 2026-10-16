@@ -56,7 +56,7 @@ namespace DoctorSimiBoss.Core.Tests
 
             Assert.Equal(6, m.PlannedSpecials.Count);
             Assert.All(m.PlannedSpecials, s => Assert.NotEqual(AssetStatus.Ready, s.AssetStatus));
-            Assert.Equal(900, m.Tuning.MaxHealth);
+            Assert.Equal(500, m.Tuning.MaxHealth);
             Assert.Contains(m.ConceptReferences, c => c.Path == "References/special_attacks_concept_sheet.png");
         }
 

@@ -14,6 +14,12 @@ namespace DoctorSimiBoss.Core.Manifest
         public float OriginY = 0.9f;
         /// <summary>Direction the sprites are drawn facing: "left" or "right".</summary>
         public string SpriteFacing = "left";
+        /// <summary>Frame pixels per game world unit for the boss sprites; 0 when not declared.</summary>
+        public float SpritePixelsPerUnit;
+        /// <summary>Hurtbox in frame pixels, or null.</summary>
+        public PixelRect BodyBox;
+        /// <summary>Damaging area of the punch in frame pixels, or null.</summary>
+        public PixelRect PunchBox;
 
         /// <summary>Character animations keyed by name (Idle, Attack, Walk...).</summary>
         public readonly Dictionary<string, AnimationClipInfo> Animations = new Dictionary<string, AnimationClipInfo>();
@@ -70,6 +76,15 @@ namespace DoctorSimiBoss.Core.Manifest
         public string DebugKey;
         /// <summary>Animation played by the boss when it enters (Spawn: jumps in and lands).</summary>
         public string EntranceAnimation;
+    }
+
+    /// <summary>Rectangle in frame pixels: origin at the top-left corner, sprite facing <see cref="AnimationManifest.SpriteFacing"/>.</summary>
+    public sealed class PixelRect
+    {
+        public float X;
+        public float Y;
+        public float Width;
+        public float Height;
     }
 
     public sealed class AnimationClipInfo
@@ -138,6 +153,8 @@ namespace DoctorSimiBoss.Core.Manifest
         public float? PhaseTransitionDuration;
         public float? SpecialChance;
         public float? IntroDuration;
+        public int? ContactDamage;
+        public int? AttackDamage;
     }
 
     public static class AssetStatus

@@ -102,6 +102,7 @@ namespace DoctorSimiBoss.Core.Manifest
             CheckPhases(manifest, report);
             CheckSpecials(manifest, report);
             CheckArena(manifest, resolvePath, report);
+            CheckBoxes(manifest, report);
             CheckEncounter(manifest, report);
             return report;
         }
@@ -136,6 +137,21 @@ namespace DoctorSimiBoss.Core.Manifest
                 report.Errors.Add("Arena bossLandingX must be between the walls");
             if (a.PlayerEntryX <= a.LeftWallX || a.PlayerEntryX >= a.RightWallX)
                 report.Errors.Add("Arena playerEntryX must be between the walls");
+        }
+
+        private static void CheckBoxes(AnimationManifest manifest, ManifestReport report)
+        {
+            if (manifest.SpritePixelsPerUnit < 0) report.Errors.Add("spriteScale.pixelsPerUnit must be positive");
+            CheckBox(manifest, manifest.BodyBox, "hitboxes.body", report);
+            CheckBox(manifest, manifest.PunchBox, "hitboxes.punch", report);
+        }
+
+        private static void CheckBox(AnimationManifest manifest, PixelRect box, string name, ManifestReport report)
+        {
+            if (box == null) return;
+            if (box.Width <= 0 || box.Height <= 0) report.Errors.Add(name + " must have a positive size");
+            if (box.X < 0 || box.Y < 0 || box.X + box.Width > manifest.FrameWidth || box.Y + box.Height > manifest.FrameHeight)
+                report.Errors.Add(name + " must fit inside the " + manifest.FrameWidth + "x" + manifest.FrameHeight + " frame");
         }
 
         private static void CheckEncounter(AnimationManifest manifest, ManifestReport report)

@@ -49,6 +49,16 @@ namespace DoctorSimiBoss.Core.Manifest
                 manifest.SpriteFacing = facing;
             }
 
+            var scale = GetObject(root, "spriteScale");
+            if (scale != null) manifest.SpritePixelsPerUnit = (float)GetNumber(scale, "pixelsPerUnit", 0);
+
+            var hitboxes = GetObject(root, "hitboxes");
+            if (hitboxes != null)
+            {
+                manifest.BodyBox = ReadRect(GetObject(hitboxes, "body"));
+                manifest.PunchBox = ReadRect(GetObject(hitboxes, "punch"));
+            }
+
             ReadClips(GetObject(root, "animations"), manifest.Animations);
             ReadClips(GetObject(root, "effects"), manifest.Effects);
 
@@ -120,6 +130,8 @@ namespace DoctorSimiBoss.Core.Manifest
                     PhaseTransitionDuration = GetOptionalFloat(tuning, "phaseTransitionDuration"),
                     SpecialChance = GetOptionalFloat(tuning, "specialChance"),
                     IntroDuration = GetOptionalFloat(tuning, "introDuration"),
+                    ContactDamage = GetOptionalInt(tuning, "contactDamage"),
+                    AttackDamage = GetOptionalInt(tuning, "attackDamage"),
                 };
             }
 
@@ -178,6 +190,18 @@ namespace DoctorSimiBoss.Core.Manifest
                 }
                 target[pair.Key] = clip;
             }
+        }
+
+        private static PixelRect ReadRect(Dictionary<string, object> obj)
+        {
+            if (obj == null) return null;
+            return new PixelRect
+            {
+                X = (float)GetNumber(obj, "x", 0),
+                Y = (float)GetNumber(obj, "y", 0),
+                Width = (float)GetNumber(obj, "width", 0),
+                Height = (float)GetNumber(obj, "height", 0),
+            };
         }
 
         private static Dictionary<string, object> AsObject(object value, string where)

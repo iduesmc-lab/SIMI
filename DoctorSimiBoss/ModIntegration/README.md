@@ -8,8 +8,8 @@
 | Lectura y validación del manifiesto | Implementada. Comprueba que existan los 48 cuadros, que sean PNG de 128 × 128, que las fases sean coherentes y que no se use arte conceptual como sprite. |
 | Entrada del mod (`DoctorSimiBossMod.cs`) | Carga y valida el manifiesto y lo escribe en el log. **Compila sin errores ni avisos** contra el `Assembly-CSharp.dll` de ModdingAPI v77 publicado (`moddingapi.v77.windows.zip`, misma fecha y tamaño que el instalado por Scarab). Las 250 referencias a `mscorlib` existen en el `mscorlib.dll` del juego. **Probado en el juego** (Hollow Knight 1.5.78.11833, API v77, instalado con Lumafly): carga sin errores, los 48 cuadros dan OK y la arena mide 41.78 × 23.53 unidades según `ModLog.txt`. |
 | Arena | Tu imagen está en `../Arena/` con suelo, paredes y puntos de entrada medidos (provisionales). Se valida y se empaqueta. |
-| Inserción en una escena | **No implementada.** Faltan la versión del juego y la ruta de `Managed` (ver abajo). |
-| Jugable en Hollow Knight | **No.** Todavía no hay objeto del jefe en el juego, ni sprites cargados en Unity, ni colisiones. |
+| Encuentro en el juego (`Scene/`, v0.3.0) | **Compilado, sin probar en el juego.** Con **F8** en una sala jugable se construye la arena a la derecha de la sala (fuera de sus límites), el Caballero entra, la cámara se bloquea con el `CameraLockArea` del juego y el Doctor Simi entra con Spawn. Recibe golpes del aguijón y hechizos (`IHitResponder`), hace daño por contacto y con el puño (`DamageHero`) y usa la máquina de estados de `Core`. **F8** otra vez cierra la arena y te devuelve a donde estabas. Los especiales usan el golpe Attack con sus tiempos; ondas, cápsulas y pulsos aún no existen. |
+| Jugable en Hollow Knight | **Pendiente de la primera prueba.** |
 
 ## Estructura
 
@@ -21,10 +21,12 @@ DoctorSimiBoss/
 │  ├─ Combat/                     Máquina de estados, ajustes, catálogo de ataques y cerebro (IA)
 │  ├─ Arena/ArenaLayout.cs        Convierte las medidas en píxeles de la imagen a unidades de mundo
 │  ├─ Animation/                  Elige qué clip reproducir en cada estado (con provisionales)
+│  ├─ Arena/FrameGeometry.cs      Cajas de golpe en píxeles del cuadro → unidades alrededor del pivote
 │  ├─ Hosting/IBossBody.cs        Lo que la escena debe proporcionar al jefe
 │  ├─ Hosting/BossDriver.cs       Conecta la máquina de estados con IBossBody
 │  └─ BossDefinition.cs           Manifiesto + validación + ajustes + ataques en un solo objeto
 ├─ ModIntegration/                Proyecto del mod (compila también los fuentes de Core en una sola DLL)
+│  └─ Scene/                      Capa de Unity: sprites, cuerpo del jefe, arena y tecla de acceso
 └─ Tests/DoctorSimiBoss.Core.Tests/  Pruebas xUnit de Core contra el manifiesto y los PNG reales
 ```
 
@@ -68,6 +70,16 @@ Todo es aditivo salvo una corrección:
 - Nuevos campos: `spriteFacing` (los sprites miran a la izquierda), `displayName`, `conceptSheet` y `prototypeTiming` en cada especial, `includesPreviousSpecials` en la fase 3, bloque `tuning` y lista `conceptReferences`.
 - Los tiempos y ajustes son puntos de partida para probar, no balance final. Las distancias están en unidades de mundo sin calibrar.
 
+## Probar el encuentro (v0.3.0)
+
+1. Instala `DoctorSimiBoss.zip` con Lumafly (**Manually install**), sustituyendo la versión anterior.
+2. Carga una partida y, ya controlando al Caballero en cualquier sala, pulsa **F8**.
+3. Para salir, pulsa **F8** otra vez. Si mueres, el juego te devuelve al banco como siempre y la arena desaparece.
+4. La tecla se cambia en `Assets/animation_manifest.json` → `encounter.debugKey` (nombres de `UnityEngine.KeyCode`, por ejemplo `F7` o `O`).
+5. `ModLog.txt` registra al abrir la arena las capas de física elegidas, los cambios de fase, el aturdimiento y la derrota.
+
+Piezas del juego usadas, todas comprobadas en Assembly-CSharp 1.5.78.11833-77 y en las DLL de Unity del jugador: `HitTaker.Hit` → `IHitResponder.Hit(HitInstance)`, `HeroBox.CheckForDamage` → `DamageHero.damageDealt`, `CameraLockArea` (`cameraXMin/XMax/YMin/YMax`), `CameraController.xLimit/yLimit/sceneWidth/SnapTo` (la cámara limita su centro a x ≥ 14,6 e y ≥ 8,3), `HeroController.instance/SoulGain/acceptingInput/cState`, `GameManager.instance/isPaused/IsGameplayScene`, capas de `GlobalEnums.PhysLayers`.
+
 ## Compilar y probar
 
 Pruebas de la lógica (no necesitan el juego; requieren .NET SDK 8):
@@ -76,7 +88,7 @@ Pruebas de la lógica (no necesitan el juego; requieren .NET SDK 8):
 dotnet test DoctorSimiBoss/Tests/DoctorSimiBoss.Core.Tests
 ```
 
-Mod (requiere la Modding API instalada en tu juego):
+Mod (requiere la Modding API instalada en tu juego y, desde la v0.3.0, estas DLL de `Managed`: `UnityEngine`, `UnityEngine.CoreModule`, `UnityEngine.ImageConversionModule`, `UnityEngine.Physics2DModule`, `UnityEngine.InputLegacyModule` y `PlayMaker`):
 
 1. Pon Hollow Knight en **1.5.78.11833** y activa la API con Lumafly (ver *Versión del juego* más abajo).
 2. Compila apuntando a tu carpeta `Managed` (en Windows, desde PowerShell, con el .NET SDK instalado):

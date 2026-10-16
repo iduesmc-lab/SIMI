@@ -23,7 +23,7 @@ namespace DoctorSimiBoss.Core.Tests
             Assert.Equal(BossState.Intro, m.State);
             Assert.True(m.IsInvulnerable);
             Assert.Equal(HitResult.Ignored, m.ReceiveHit(50));
-            Assert.Equal(900, m.Health);
+            Assert.Equal(_def.Tuning.MaxHealth, m.Health);
 
             m.Tick(1.0f, 1f);
             Assert.Equal(BossState.Idle, m.State);
@@ -36,7 +36,7 @@ namespace DoctorSimiBoss.Core.Tests
             var m = _def.CreateStateMachine(new ScriptedBrain());
             Assert.Equal(HitResult.Ignored, m.ReceiveHit(50));
             Assert.Equal(BossState.Intro, m.State);
-            Assert.Equal(900, m.Health);
+            Assert.Equal(_def.Tuning.MaxHealth, m.Health);
         }
 
         [Fact]

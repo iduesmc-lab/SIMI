@@ -19,6 +19,7 @@ namespace DoctorSimiBoss.Core.Tests
         private BossStateMachine Create(IBossBrain brain, Action<BossTuning> tweak = null)
         {
             _def.Tuning.IntroDuration = 0;
+            _def.Tuning.MaxHealth = 900; // thresholds below are written for 900 HP
             tweak?.Invoke(_def.Tuning);
             return _def.CreateStateMachine(brain);
         }

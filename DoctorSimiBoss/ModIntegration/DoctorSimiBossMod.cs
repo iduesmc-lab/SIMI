@@ -3,19 +3,19 @@ using System.IO;
 using System.Reflection;
 using DoctorSimiBoss.Core;
 using DoctorSimiBoss.Core.Manifest;
+using DoctorSimiBoss.Scene;
 using Modding;
+using UnityEngine;
 
 namespace DoctorSimiBoss
 {
     /// <summary>
-    /// Loader entry point. It loads and validates the animation manifest and builds the boss
-    /// definition (tuning, attacks, phases), then logs the result.
+    /// Loader entry point. It loads and validates the animation manifest, builds the boss definition
+    /// (tuning, attacks, phases), loads the sprites and installs the debug-key encounter (Scene/).
     ///
-    /// It does NOT insert the boss into any scene yet.
-    ///
-    /// Modding API members used here, checked against the public source of ModdingAPI
-    /// 1.5.78.11833-77 (not yet compiled against the player's own Assembly-CSharp.dll):
-    /// Mod (abstract, Loggable), virtual Initialize(), virtual GetVersion(), Loggable.Log(string).
+    /// Modding API members used here, checked against ModdingAPI 1.5.78.11833-77 (source and the
+    /// published Assembly-CSharp.dll): Mod(string name), virtual Initialize(), virtual GetVersion(),
+    /// Loggable.Log(string).
     /// The loader scans Managed/Mods/&lt;subfolder&gt;/*.dll, so this DLL must live in its own
     /// subfolder with Assets/ beside it.
     /// </summary>
@@ -26,7 +26,9 @@ namespace DoctorSimiBoss
         /// <summary>Validated definition, or null if loading failed. Scene integration will use it.</summary>
         public static BossDefinition Definition { get; private set; }
 
-        public override string GetVersion() => "0.2.0-prototype";
+        public DoctorSimiBossMod() : base("Doctor Simi Boss") { }
+
+        public override string GetVersion() => "0.3.0-prototype";
 
         public override void Initialize()
         {
@@ -57,10 +59,34 @@ namespace DoctorSimiBoss
                 definition.Tuning.MaxHealth + ". Scene insertion is not implemented yet.");
 
             var arena = definition.CreateArenaLayout();
-            if (arena != null)
-                Log("Arena: " + arena.Width.ToString("0.##") + " x " + arena.Height.ToString("0.##") +
-                    " world units, floor at y=" + arena.FloorY.ToString("0.##") +
-                    ", walls at x=" + arena.LeftWallX.ToString("0.##") + " and x=" + arena.RightWallX.ToString("0.##") + ".");
+            if (arena == null)
+            {
+                Log("Manifest has no arena; the encounter is not available.");
+                return;
+            }
+            Log("Arena: " + arena.Width.ToString("0.##") + " x " + arena.Height.ToString("0.##") +
+                " world units, floor at y=" + arena.FloorY.ToString("0.##") +
+                ", walls at x=" + arena.LeftWallX.ToString("0.##") + " and x=" + arena.RightWallX.ToString("0.##") + ".");
+
+            string keyName = definition.Manifest.Encounter?.DebugKey ?? "F8";
+            KeyCode key;
+            try { key = (KeyCode)Enum.Parse(typeof(KeyCode), keyName, true); }
+            catch (ArgumentException)
+            {
+                Log("Unknown encounter.debugKey '" + keyName + "'; using F8.");
+                key = KeyCode.F8;
+            }
+
+            SpriteLibrary sprites;
+            try { sprites = SpriteLibrary.Load(definition, modDirectory); }
+            catch (Exception e)
+            {
+                Log("Could not load sprites: " + e.Message);
+                return;
+            }
+
+            EncounterController.Install(definition, sprites, key, Log);
+            Log("Encounter ready: press " + key + " in a gameplay room to enter the arena, and again to leave.");
         }
     }
 }

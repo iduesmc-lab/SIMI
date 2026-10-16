@@ -2,8 +2,8 @@
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <AssemblyTitle>DoctorSimiBoss</AssemblyTitle>
-    <AssemblyVersion>0.2.0.0</AssemblyVersion>
-    <FileVersion>0.2.0.0</FileVersion>
+    <AssemblyVersion>0.3.0.0</AssemblyVersion>
+    <FileVersion>0.3.0.0</FileVersion>
     <OutputPath>bin\$(Configuration)\</OutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <LangVersion>latest</LangVersion>
@@ -28,6 +28,30 @@
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
       <HintPath>$(HollowKnightManagedDir)Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(HollowKnightManagedDir)UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(HollowKnightManagedDir)UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>$(HollowKnightManagedDir)UnityEngine.ImageConversionModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.Physics2DModule">
+      <HintPath>$(HollowKnightManagedDir)UnityEngine.Physics2DModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>$(HollowKnightManagedDir)UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="PlayMaker">
+      <HintPath>$(HollowKnightManagedDir)PlayMaker.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>
@@ -73,7 +97,7 @@
   </Target>
 
   <Target Name="CheckHollowKnightRefs" BeforeTargets="ResolveAssemblyReferences">
-    <Error Condition="!Exists('$(HollowKnightManagedDir)Assembly-CSharp.dll')"
-           Text="Assembly-CSharp.dll was not found in '$(HollowKnightManagedDir)'. Copy your game's Managed folder to ModIntegration/HollowKnightManaged or pass -p:HollowKnightRefs=&lt;path to Managed&gt;" />
+    <Error Condition="!Exists('$(HollowKnightManagedDir)Assembly-CSharp.dll') Or !Exists('$(HollowKnightManagedDir)UnityEngine.CoreModule.dll')"
+           Text="Assembly-CSharp.dll or UnityEngine.CoreModule.dll was not found in '$(HollowKnightManagedDir)'. Copy your game's Managed folder to ModIntegration/HollowKnightManaged or pass -p:HollowKnightRefs=&lt;path to Managed&gt;" />
   </Target>
 </Project>

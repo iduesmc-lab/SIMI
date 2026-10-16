@@ -8,10 +8,29 @@
   },
   "origin": {
     "x": 0.5,
-    "y": 0.9,
-    "note": "Provisional normalized pivot; calibrate in-game."
+    "y": 0.97,
+    "note": "Normalized pivot from the top-left of each 128x128 frame: feet rest on row ~124 in Idle/Attack/Walk. Measured from the PNGs; calibrate in-game."
   },
   "spriteFacing": "left",
+  "spriteScale": {
+    "pixelsPerUnit": 32,
+    "note": "Boss is ~116 px tall in each frame, so about 3.6 world units at 32 px/unit."
+  },
+  "hitboxes": {
+    "note": "Rectangles in frame pixels (origin top-left, sprite facing left), measured from the PNGs.",
+    "body": {
+      "x": 30,
+      "y": 10,
+      "width": 70,
+      "height": 114
+    },
+    "punch": {
+      "x": 4,
+      "y": 50,
+      "width": 32,
+      "height": 28
+    }
+  },
   "animations": {
     "Spawn": {
       "loop": false,
@@ -264,8 +283,8 @@
     }
   ],
   "tuning": {
-    "note": "Prototype values in game world units; not final balance.",
-    "maxHealth": 900,
+    "note": "Prototype values in game world units; not final balance. maxHealth lowered to 500 for the first in-game tests.",
+    "maxHealth": 500,
     "moveSpeed": 4,
     "attackRange": 3,
     "idleBetweenActions": 0.8,
@@ -275,7 +294,9 @@
     "stunDuration": 2.5,
     "phaseTransitionDuration": 1.5,
     "specialChance": 0.45,
-    "introDuration": 1.0
+    "introDuration": 1.0,
+    "contactDamage": 1,
+    "attackDamage": 1
   },
   "conceptReferences": [
     {
@@ -341,9 +362,9 @@
     "playerEntryX": 420
   },
   "encounter": {
-    "note": "Chosen for the first in-game test: a debug key in any room takes the player to the arena; the boss jumps in and lands.",
+    "note": "First in-game test: press debugKey in a gameplay room to enter the arena; press it again to leave. The boss jumps in (Spawn) and lands.",
     "access": "debugKey",
-    "debugKey": null,
+    "debugKey": "F8",
     "entranceAnimation": "Spawn"
   }
 }
