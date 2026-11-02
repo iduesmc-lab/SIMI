@@ -29,7 +29,7 @@ namespace DoctorSimiBoss
 
         public DoctorSimiBossMod() : base("Doctor Simi Boss") { }
 
-        public override string GetVersion() => "0.9.0-prototype";
+        public override string GetVersion() => "0.10.0-prototype";
 
         /// <summary>
         /// Objects whose music cue the boss can borrow, from presentation.musicPreloads. The manifest is read

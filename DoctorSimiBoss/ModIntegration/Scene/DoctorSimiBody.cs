@@ -484,7 +484,7 @@ namespace DoctorSimiBoss.Scene
             var start = HandPosition() + new Vector3(0f, 0.6f * index, 0f);
             float angle = (_facing > 0 ? 40f : 140f) + (index - 1) * 15f;
             var dir = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
-            var art = _sprites.Get("Syringe");
+            var art = _sprites.Get("HomingSyringe");
             var hazard = Hazard.Spawn(transform.parent, "Syringe", art ?? new[] { ProceduralSprites.Syringe }, 10f, false, angle, start,
                                       Vector2.one, new Vector2(1.0f, 0.25f), Vector2.zero, dir * 11f, 5f,
                                       _layers.EnemyDamage, _definition.Tuning.AttackDamage, LeftWall - 0.5f, RightWall + 0.5f, Floor, true,

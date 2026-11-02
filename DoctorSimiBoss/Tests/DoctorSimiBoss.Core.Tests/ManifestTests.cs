@@ -50,9 +50,9 @@ namespace DoctorSimiBoss.Core.Tests
             Assert.Equal(new[] { "Spawn", "Idle", "Walk", "Attack", "Hurt", "Stun", "Defeat",
                                  "SpecialPunch", "SpecialSlam", "SpecialDash", "SpecialSpin", "SpecialCapsules", "SpecialWave" },
                          m.Animations.Keys.ToArray());
-            Assert.Equal(new[] { "PunchImpact", "Shockwave", "Capsule", "CapsuleBurst" }, m.Effects.Keys.ToArray());
-            Assert.Equal(256, m.Effects["Shockwave"].FrameWidth);
-            Assert.Equal(0.97f, m.Effects["Shockwave"].OriginY.Value, 3);
+            Assert.Equal(new[] { "PunchImpact", "Shockwave", "Capsule", "CapsuleBurst", "HomingSyringe", "Bandage" }, m.Effects.Keys.ToArray());
+            Assert.Equal(320, m.Effects["Shockwave"].FrameWidth);
+            Assert.Equal(0.875f, m.Effects["Shockwave"].OriginY.Value, 3);
             Assert.Equal(3, m.Animations["Attack"].SuggestedDamageFrame);
             Assert.True(m.Effects.ContainsKey("PunchImpact"));
 
@@ -78,9 +78,9 @@ namespace DoctorSimiBoss.Core.Tests
             Assert.Empty(report.Warnings);
             Assert.True(definition.CanRun);
             Assert.True(report.PlaceholdersAvailable);
-            Assert.Equal(17, report.Clips.Count);
+            Assert.Equal(19, report.Clips.Count);
             Assert.All(report.Clips, c => Assert.True(c.IsPlayable, c.Name));
-            Assert.Equal(13 * 6 + 3 * 6 + 2, report.Clips.Sum(c => c.DeclaredFrames));
+            Assert.Equal(13 * 6 + 3 * 6 + 2 + 3 + 3, report.Clips.Sum(c => c.DeclaredFrames));
         }
 
         [Fact]
