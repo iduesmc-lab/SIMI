@@ -11,7 +11,6 @@ common baseline and the body centred horizontally. It writes:
 
   <out>/<Anim>/<anim>_00.png ...           one PNG per frame
   <out>/<Anim>/<anim>_spritesheet.png      all frames in a row
-  <out>/<Anim>/<anim>_preview.gif          quick animated preview
 
 and prints the frame list to paste into animation_manifest.json.
 
@@ -144,7 +143,6 @@ def main():
     ap.add_argument("--tolerance", type=float, default=90.0)
     ap.add_argument("--softness", type=float, default=60.0)
     ap.add_argument("--alpha-threshold", type=int, default=40)
-    ap.add_argument("--fps", type=float, default=10.0, help="preview GIF speed")
     ap.add_argument("--no-scale-lock", action="store_true",
                     help="scale every frame to --char-height on its own (default keeps one scale for the animation)")
     ap.add_argument("--scale", type=float,
@@ -211,10 +209,6 @@ def main():
     for i, frame in enumerate(frames):
         strip.alpha_composite(frame, (i * fs, 0))
     strip.save(os.path.join(folder, f"{low}_spritesheet.png"), optimize=True)
-
-    preview = [Image.alpha_composite(Image.new("RGBA", (fs, fs), (40, 44, 52, 255)), f).convert("P", palette=Image.ADAPTIVE) for f in frames]
-    preview[0].save(os.path.join(folder, f"{low}_preview.gif"), save_all=True, append_images=preview[1:],
-                    duration=int(1000 / args.fps), loop=0)
 
     print(f"{len(frames)} frames of {fs}x{fs} written to {folder}")
     print('Manifest "frames" for %s:' % name)
